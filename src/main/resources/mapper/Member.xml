@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.Member">
+ 	
+ 	<!-- 회원 가입 -->
+	<insert id ="insertMember" parameterType="com.mbc.leteatgo.domain.MemberDTO">
+		INSERT INTO member_tbl VALUES (
+		#{memberNum},
+		#{memberId},
+		#{memberPw},
+		#{memberName},
+		#{memberNick},
+		#{memberGender},
+		#{memberBirthday},
+		#{memberEmail},
+		#{memberMobile},
+		#{memberZip},
+		#{memberRoadAddress},
+		#{memberJibunAddress},
+		#{memberDetailAddress},
+		sysdate,
+		1
+		)
+	</insert>
+	
+	<!-- 회원 롤 삽입 -->
+	<insert id="insertRole" parameterType="com.mbc.leteatgo.domain.Role">
+		INSERT INTO member_role_tbl VALUES (
+		member_roles_seq.nextval,
+		<!-- role의 멤버필드명이 변경되는걸 시큐리티가 허용하는지 나중에 테스트 필요
+		#{username}, ROLE 에서 가져온 username VO 값 객체
+		#{role}
+		 -->
+		#{memberId},
+		#{memberRole} 
+		)
+	</insert>
+	
+	<!-- 회원 정보 조회 (단일) -->
+	<select id ="selectMember" parameterType="String"
+			resultType="com.mbc.leteatgo.domain.MemberDTO">
+		SELECT
+		member_num as "memberNum",
+		member_id as "memberId",
+		member_pw as "memberPw",
+		member_name as "memberName",
+		member_nick as "memberNick",
+		member_gender as "memberGender",
+		member_birthday as "memberBirthday",
+		member_email as "memberEmail",
+		member_mobile as "memberMobile",
+		member_zip as "memberZip",
+		member_road_address as "memberRoadAddress",
+		member_jibun_address as "memberJibunAddress",
+		member_detail_address as "memberDetailAddress",
+		member_join_date as "memberJoinDate",
+		member_enabled as "memberEnabled"
+		FROM member_tbl WHERE member_id = #{memberId}
+	</select>
+
+	<!-- 회원 정보 수정 -->
+	<update id = "updateMember" parameterType="com.mbc.leteatgo.domain.MemberDTO">
+		UPDATE member_tbl
+		<set>
+			<if test="memberPw != null">member_pw = #{memberPw},</if>
+			<if test="memberMobile != null">member_mobile = #{memberMobile},</if>
+			<if test="memberEmail != null">member_email = #{memberEmail},</if>
+			<if test="memberZip != null">member_zip = #{memberZip},</if>
+			<if test="memberRoadAddress != null">member_road_Address = #{memberRoadAddress},</if>
+			<if test="memberJibunAddress != null">member_jibun_Address = #{memberJibunAddress},</if>
+			<if test="memberDetailAddress != null">member_detail_Address = #{memberDetailAddress},</if>
+		</set>
+		WHERE member_id = #{memberId}
+	</update>
+	
+<!-- #############################회원 수정(관리자)######################## -->
+	
+	<!-- 전체 회원 수 -->
+	<select id="selectMembersCount" resultType="int">
+		SELECT COUNT(*) FROM member_tbl
+	</select>
+	
+	<!-- 전체 회원 정보 조회 (페이징) -->
+	<select id = "selectMembersByPaging" parameterType="map"
+			resultType="com.mbc.leteatgo.domain.MemberDTO">
+		SELECT member_num as "memberNum",
+			   member_id as "memberId",
+			   member_pw as "memberPw",
+			   member_name as "memberName",
+			   member_nick as "memberNick",
+			   member_gender as "memberGender",
+			   member_birthday as "memberBirthday",		
+			   member_email as "memberEmail",
+			   member_mobile as "memberMobile",
+			   member_zip as "memberZip",
+			   member_road_address as "memberRoadAddress",
+			   member_jibun_address as "memberJibunAddress",
+			   member_detail_address as "memberDetailAddress",
+			   member_join_date as "memberJoinDate",
+			   member_enabled as "memberEnabled"
+		FROM (SELECT m.*,
+					 FLOOR((ROWNUM - 1) / ${limit} + 1) page
+			 FROM (
+			 		SELECT *
+			 		FROM member_tbl
+			 		ORDER BY member_id DESC
+			 	  ) m
+			 )
+		WHERE page = #{page}	
+	</select>
+	
+	<!-- 전체 회원 정보 조회 (페이징) : 아이디 중심 내림차순 정렬 -->
+	
+	<select id="selectMembersWithRolesByPaging" parameterType="map" resultType="map">
+		SELECT 
+			member_num,
+	        member_id,
+	        member_pw,
+	        member_name,
+	        member_nick,
+	        member_gender,
+	        member_birthday,
+	        member_email,
+	        member_mobile,
+	        member_zip,
+	        member_road_address,
+	        member_jibun_address,
+	        member_detail_address,
+	        member_join_date,
+	        member_enabled,
+	        role as member_role,
+	        page
+		FROM (SELECT m.*,
+					 FLOOR((ROWNUM - 1) / ${limit} + 1) page
+			 FROM	(
+			 		  SELECT
+			 		  DISTINCT m.*,
+			 		  (
+			 		  	 SELECT LISTAGG(r2.member_role, ',') WITHIN GROUP (ORDER BY m2.member_id)
+			 		  	 FROM member_tbl m2, member_role_tbl r2
+			 		  	 WHERE r2.member_id = m2.member_id
+			 		  	 AND r2.member_id = m.member_id
+			 		  ) AS "ROLE"
+			 		  FROM member_tbl m, member_role_tbl r
+			 		  WHERE m.member_id = r.member_id
+			 		  ORDER BY m.member_id DESC
+			 		) m 
+			 )
+		WHERE page = #{page}
+	</select>
+	
+	<!-- 아이디/이메일/휴대폰 존재여부(중복) 점검 : 회원 정보 수정 -->
+	<select id="hasFldForUpdate" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM (
+				SELECT member_${fld} FROM member_tbl
+				WHERE MEMBER_ID != #{id}
+			)
+		WHERE member_${fld} = #{val}
+	</select>
+	
+	<!-- 회원 롤(등급) 조회 -->
+	<select id="selectRolesById" parameterType="String" resultType="String">
+		SELECT member_role FROM member_role_tbl WHERE member_id = #{member_id}
+	</select>
+	
+	<!-- 회원 롤 삭제 -->
+	<delete id="deleteRoleById" parameterType="map">
+		DELETE FROM member_role_tbl
+		WHERE member_id = #{id} AND member_role = #{role}
+	</delete>
+	
+	<!-- 회원 롤(등급)들 삭제 -->
+	<delete id="deleteRolesById" parameterType="String">
+		DELETE FROM member_role_tbl WHERE member_id = #{member_id}
+	</delete>
+	
+	<!-- 회원 정보 삭제 -->
+	<delete id="deleteMemberById" parameterType="map">
+		DELETE FROM member_tbl WHERE member_id = #{id}
+	</delete>
+	
+	<!-- 선호/비선호 재료 삭제 -->
+	<delete id="deleteLadById" parameterType="map">
+		DELETE FROM lad_tbl WHERE member_id = #{id}
+	</delete>
+	
+	<!-- 검색 회원 정보 수 -->
+	<select id="selectMembersCountBySearching" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM
+		<if test="searchKey == 'member_role'">
+		member_role_tbl
+		</if>
+		<if test="searchKey != 'member_role'">
+		member_tbl
+		</if>
+		WHERE
+		<if	test="searchKey == 'member_address'">
+			member_road_address like '%${searchWord}%'
+			OR member_jibun_address like '%${searchWord}%'
+			OR member_detail_address like '%${searchWord}%'
+		</if>
+		<if test="searchKey == 'member_name' and searchKey != 'member_address'">
+			member_name like '%${searchWord}%'
+		</if>
+		<if test="searchKey != 'member_name' and searchKey != 'member_address' and searchKey != 'member_join_date'">
+			${searchKey} = #{searchWord}
+		</if>
+		
+		<if test="searchKey == 'member_join_date'">
+			TO_CHAR(member_join_date, 'YYYY-MM-DD') = #{searchWord}
+		</if>
+		
+	</select>
+	
+	
+	<!-- 회원 정보 키워드 검색(조회) (페이징) : 아이디 중심 내림차순 정렬 -->
+<!-- 	<select id="selectMembersWithRolesBySearching" parameterType="map" resultType="map">
+		SELECT	member_num,
+				member_id,
+				member_pw,
+				member_name,
+				member_nick,
+				member_gender,
+				member_birthday,
+				member_email,
+				member_mobile,
+				member_zip,
+				member_road_address,
+				member_jibun_address,
+				member_detail_address,
+				member_join_date,
+				member_enabled,
+				role as member_role,
+				page
+		FROM (SELECT m.*,
+					 FLOOR((ROWNUM - 1) / ${limit} +1) page
+			 FROM (
+			 		SELECT
+			 		DISTINCT m.*,
+			 		(
+			 		   SELECT LISTAGG(r2.member_role, ',') WITHIN GROUP (ORDER BY m2.member_id)
+			 		   FROM member_tbl m2, member_role_tbl r2
+			 		   WHERE r2.member_id = m2.member_id
+			 		   AND r2.member_id = m.member_id
+			 		) AS "ROLE"
+			 		FROM member_tbl m, member_role_tbl r
+			 		WHERE m.member_id = r.member_id
+			 		<if test="searchKey == 'member_address'">
+			 			AND member_road_address like '%${searchWord}%'
+			 			OR member_jibun_address like '%${searchWord}%'
+			 			OR member_detail_address like '%${searchWord}%'
+			 		</if>
+			 		<if test="searchKey == 'member_name' and searchKey != 'member_address'">
+			 			AND member_name like '%${searchWord}%'
+			 		</if>
+			 		<if test="searchKey != 'member_name' and searchKey != 'member_address'">
+		 				AND m.${searchKey} = #{searchWord}
+			 		</if>
+			 		ORDER BY m.member_id DESC
+			 	 ) m
+			 )
+		WHERE page = #{page}
+	</select> -->
+	
+	
+		<!-- 회원 정보 키워드 검색(조회) (페이징) : 아이디 중심 내림차순 정렬 -->
+	<select id="selectMembersWithRolesBySearching" parameterType="map" resultType="map">
+		SELECT	member_num,
+				member_id,
+				member_pw,
+				member_name,
+				member_nick,
+				member_gender,
+				member_birthday,
+				member_email,
+				member_mobile,
+				member_zip,
+				member_road_address,
+				member_jibun_address,
+				member_detail_address,
+				member_join_date,
+				member_enabled,
+				role as member_role,
+				page
+		FROM (SELECT m.*,
+					 FLOOR((ROWNUM - 1) / ${limit} +1) page
+			 FROM (
+			 		SELECT
+			 		DISTINCT m.*,
+			 		(
+			 		   SELECT LISTAGG(r2.member_role, ',') WITHIN GROUP (ORDER BY m2.member_id)
+			 		   FROM member_tbl m2, member_role_tbl r2
+			 		   WHERE r2.member_id = m2.member_id
+			 		   AND r2.member_id = m.member_id
+			 		) AS "ROLE"
+			 		FROM member_tbl m, member_role_tbl r
+			 		WHERE m.member_id = r.member_id
+			 		<if test="searchKey == 'member_address'">
+			 			AND member_road_address like '%${searchWord}%'
+			 			OR member_jibun_address like '%${searchWord}%'
+			 			OR member_detail_address like '%${searchWord}%'
+			 		</if>
+			 		<if test="searchKey == 'member_name' and searchKey != 'member_address'">
+			 			AND member_name like '%${searchWord}%'
+			 		</if>
+			 		<if test="searchKey != 'member_name' and searchKey != 'member_address' and searchKey != 'member_join_date'">
+		 				AND m.${searchKey} = #{searchWord}
+			 		</if>
+			 		
+			 		<if test="searchKey == 'member_join_date'">
+			 			AND TO_CHAR(m.member_join_date, 'YYYY-MM-DD') = #{searchWord}
+			 		</if>
+			 		ORDER BY m.member_id DESC
+			 	 ) m
+			 )
+		WHERE page = #{page}
+	</select>
+	
+	<!-- 회원 활동/휴면 상태(enabled) 변경 -->
+	<update id="changeEnabled" parameterType="map">
+		UPDATE member_tbl SET member_enabled = #{enabled}
+		WHERE member_id = #{id}
+	</update>
+	
+	
+</mapper>

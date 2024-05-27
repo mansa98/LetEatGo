@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+ 	  lang="ko-kr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>login box</title>
+
+<style>
+@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+</style>
+<link th:href="@{'/css/login.css'}" rel="stylesheet" />
+
+<script type="text/javascript">
+	function popUp(){
+		// open("경로", "이름", "옵션")
+		window.open("/findId", "아이디 찾기", "width=500px, height=400, left=700, top=200");
+	}
+</script>
+</head>
+<body>
+
+
+
+		<script th:inline="javascript" th:if="${error == 'true'}">
+		<!--
+			alert([[${msg.message}]]);
+		//-->
+		</script>
+		
+		<!-- 홈페이지 로고 -->
+		<div id="logo">
+		<a  th:href="@{'/'}"><img id="mainlogo" th:src="@{/images/blue.png}"
+							width="150" height="35" /></a>
+		</div>
+		<h1>login</h1>
+		<!-- 1. 로그인 박스 시작 -->
+		<div id="login_box">
+
+			<form id="login_frm"
+			 method="post" th:action="@{'/member/login'}">
+
+				<!-- 2. 아이디 필드 섹션 시작 -->
+				<div id="id_box">
+
+					<!-- 
+		               2. 아이디 필드 작성 조건
+		           
+		               1) 타입 : 텍스트
+		               2) id : id
+		               3) name : id
+		               4) 크기 : 30
+		               5) 최대 입력 글자수 : 20
+		               6) 내부 라벨(초기값) : 아이디
+		           -->
+
+				<input type="text" id="username" name="username" 
+						size="30" maxlength="20" placeholder="아이디"> <!-- autocomplete="off" 자동기억 제거할때 입력 -->
+
+					<!-- 아이디 에러 메시징 -->
+					<div id="id_fld_err_pnl"></div>
+
+				</div>
+				<!-- 2. 아이디 필드 섹션 끝 -->
+
+				<!-- 3. 패쓰워드 필드 섹션 시작 -->
+				<div id="pw_box">
+	
+				<!-- 
+	               3. 패쓰워드 필드 작성 조건
+	           
+	               1) 타입 : 패쓰워드
+	               2) id : password
+	               3) name : password
+	               4) 크기 : 30
+	               5) 최대 입력 글자수 : 20
+	               6) 내부 라벨(초기값) : 패쓰워드
+	           -->
+				
+				<input type="text" id="password" name="password" 
+						size="30" maxlength="20" placeholder="비밀번호">
+					<!-- 패쓰워드 에러 메시징 -->
+					<div id="password_fld_err_pnl"></div>
+				</div>
+				<!-- 3. 패쓰워드 필드 섹션 끝 -->
+
+				<!-- 4. 전송 버튼 필드 섹션 시작 -->
+				<div id="submit_box">
+					<!-- 
+		               4. 전송 버튼
+		               1) 타입 : 전송
+		               2) id : submit_btn
+		               3) 내부 라벨 : 로그인
+		           -->
+					<input type="submit" id="login_btn" value="로그인">
+					
+				</div>
+				<!-- 4. 전송 버튼 필드 섹션 끝 -->
+
+			</form>
+	
+		<ul id="under">
+			<li id="find"><a th:onclick="popUp()">아이디 찾기</a></li>
+			<li> | </li>
+			<li id="find"><a th:href="@{'/member/join'}">회원가입</a></li>
+		</ul>
+		
+		</div>
+		<!-- 1. 로그인 박스 끝 -->
+		
+			
+ 
+</body>
+</html>

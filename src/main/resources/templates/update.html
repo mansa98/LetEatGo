@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<!-- <script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script> -->
+
+<!-- AJAX library axios -->
+    <script th:src="@{'/axios/1.5.0/dist/axios.min.js'}"></script>
+
+    <!-- 주소 검색 서비스 -->
+
+    <!-- daum 우편번호 서비스 외장 JS(Javascript) 파일 링크 -->
+    <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
+
+
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<link th:href="@{'/css/member_update.css'}" rel="stylesheet"/>
+
+<script th:src="@{'/js/member_update.js'}" charset="UTF-8"></script>
+
+
+<!-- delete용 update 자바스크립트 -->
+<!-- <script th:src="@{/js/member_delete.js}" charset="UTF-8"></script> -->
+
+
+<style>
+
+a{
+	text-decoration-line: none;
+	color: #000;
+
+}
+
+th.nav-item:hover {
+  color: #0DCAF0;
+  cursor: pointer;
+}
+a:hover {
+  color: #0DCAF0;
+  cursor: pointer;
+}
+
+.fav_section {
+	margin-left: 0px;
+	/* background: red; */
+	width: 1500px;
+}
+
+.mypage_update_mar {
+	margin-bottom:68px;
+}
+
+</style>
+
+<meta charset="UTF-8">
+<title>회원 정보 수정</title>
+</head>
+<body>
+<!-- 	<div th:if="${#authentication != null}">
+			
+			<table class="table table-striped">
+				<tr>
+					<th style="width:120px">인증정보</th>
+					<td>[[${#authentication}]]</td>
+				</tr>
+			</table>
+	</div>
+	
+	<div th:if="${memberDTO2 != null}">
+		
+			<table class="table table-striped">
+				<tr>
+					<th style="width:120px">회원정보(인자)</th>
+					<td>[[${memberDTO2}]]</td>
+				</tr>
+			</table>
+			
+		</div>  -->
+	
+	
+	<div layout:fragment="content" class="content_section_mypage">
+	<div class="content_section">
+		<div class="menu_name_section"><h2>마이페이지</h2></div>
+		<div class="content_wrapper_mypage">
+			<div class="fav_section">
+				<div class="mypage_update_mar left col-12">
+					
+				</div>
+				
+				<div>
+					<table class="table" style="width:100%;">
+							<thead>
+								<!-- sec:authorize="isAuthenticated()"  -->
+								<tr class="fs-5 justify-content-start">
+									<th sec:authorize="isAuthenticated()" class="nav-item col-2" th:onclick="|location.href='@{/mypage}'|"><a>내정보</a></th>
+									<!-- <th class="col-2" th:onclick="location.href='@{/update.do}'">내정보수정</th> -->
+									<th sec:authorize="isAuthenticated()" class="nav-item col-2"><a th:href="@{/member/update.do}">내정보수정</a></th>
+									<th sec:authorize="isAuthenticated()" class="nav-item col-2"><a th:onclick="|location.href='@{/survey/}'|">선호 / 비선호</a></th>
+									<th sec:authorize="hasRole('ROLE_ADMIN')" class="nav-item col-2" ><a th:href="@{/admin/adminAllWithRoles.do}">회원관리(관리자)</a></th>
+									<th sec:authorize="isAuthenticated()" class="nav-item col-2"><a th:id="${'delete_my_btn' + memberUpdateDTO.memberId}">회원 탈퇴</a> </th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+			
+						
+				<div id="form_content_pnl" class="mx-auto text-center mt-5">
+					<h2>내정보수정</h2>
+					
+					<div id="form_content_box" class="d-flex justify-content-center mt-5">
+						<div id="frm_wrap">
+							<form id="frm" th:action="@{'updateProc.do'}" method="post" autocomplete="off" th:object="${memberUpdateDTO}" >
+							
+								<!-- 회원 아이디 -->					
+								<div id="id_fld_fnl" class="input-group d-flex mt-2 " style="width:800px; height:60px; margin-bottom:10px;">
+									
+									<div class="fld_label input-group-text">
+										<label for="id">아이디</label>
+									</div>
+									<div class="fld_content">
+										<div class="form-control_update fld_content form-control" th:text="*{memberId}"></div>
+									</div>
+								</div>
+								<!-- // 회원 아이디 -->
+								
+								<!-- 수정용 패스워드(2개) 신규, 확인 -->
+								<div id="pw1_fld_pnl" class="input-group d-flex">
+									<div class="fld_label input-group-text">
+										<label for="pw1">패스워드(신규)</label>
+									</div>
+									<div class="fld_content">
+										<input class="form-control form-control_update" type="text" id="pw1" name="pw1" maxlength="20" th:field="*{pw1}"/>
+									</div>
+								</div><!-- 1 -->
+								
+								<div id="pw2_fld_pnl" class="input-group d-flex">
+									<div class="fld_label input-group-text">
+										<label for="pw2">패스워드(확인)</label>
+									</div>
+									<div class="fld_content">
+										<input class="form-control form-control_update" type="text" id="pw2" name="pw2" maxlength="20" th:field="*{pw2}"/>
+									</div>
+								</div><!-- 2 -->
+								
+								<!-- 회원 패스워드 에러 메시징 -->
+								
+								<div id="pw_fld_err_pnl"></div>  
+								
+								<!-- // 수정용 패스워드(2개) 신규, 확인 -->
+								
+								<!-- 회원 이름 -->
+								<div id="name_fld_pnl" class="input-group d-flex">
+									<div class="fld_label input-group-text">
+										<label for="memberName">이름</label>
+									</div>
+									<div class="fld_content">
+										<div class="form-control_update fld_content form-control" th:text="*{memberName}"></div>
+									</div>
+								</div>
+								<!-- // 회원 이름 -->
+								
+								<!-- 회원 이메일 -->
+								<div id="email_fld_fnl" class="input-group d-flex" style="width:800px; height:60px; margin-bottom:10px;">
+									<div class="fld_label input-group-text">
+										<label for="memberEmail">이메일</label>
+									</div>
+								
+									<div class="fld_content">
+										<input class="form-control form-control_update" type="email" id="memberEmail" name="memberEmail" th:field="*{memberEmail}">
+									</div>
+								</div>
+								
+								<!-- 회원 이메일 에러 메시징 -->
+								
+								<div id="email_fld_err_pnl"></div>
+								
+								<!-- // 회원 이메일 -->
+								
+								<!-- 회원 연락처(휴대폰) -->
+								<div id="mobile_fld_pnl" class="input-group d-flex">
+									<div class="fld_label input-group-text">
+										<label for="memberMobile">휴대폰</label>
+									</div>
+									<div class="fld_content">
+										<input class="form-control form-control_update" type="text" id="memberMobile" name="memberMobile" th:field="*{memberMobile}"/>
+									</div>
+								</div>
+								
+								<!-- 회원 연락처(휴대폰) 에러 메시징 -->
+								
+								<div id="mobile_fld_err_pnl"></div>
+								
+								<!-- // 회원 연락처(휴대폰) -->
+								
+								<!-- 회원 우편번호 -->
+								<div id="zip_fld_pnl" class="input-group d-flex">
+									<div class="fld_label input-group-text">
+										<label for="memberZip">우편번호</label>
+									</div>
+									<div class="fld_content">
+										<input class="form-control form-control_update" type="text" id="memberZip" name="memberZip" style="width:100px;" th:field="*{memberZip}" readonly/>
+									</div>
+									<!-- 주소 검색 -->
+									&nbsp;
+									<button type="button" id="memberAddress_search_btn" onclick="getPostcodeAddress()" style="border-radius:5px;">주소 검색</button>&nbsp;
+									<button type="button" id="memberAddress_delete_btn" style="border-radius:5px; margin-left:15px;">주소 삭제</button>
+								</div>
+								
+								<!-- // 회원 우편번호 -->
+								
+								<!-- 회원 기본 주소(도로명 + 지번 주소) -->
+								<!-- 회원 도로명 주소 -->
+								<div id="road_address_fld_pnl" class="input-group d-flex">
+									<div class="fld_label input-group-text">
+										<label for="memberRoadAddress">도로명 주소</label>
+									</div>
+									<div class="fld_content">
+										<input class="form-control form-control_update" type="text" id="memberRoadAddress" name="memberRoadAddress" style="width:500px" th:field="*{memberRoadAddress}"/>
+									</div>
+								</div>	
+								<!-- // 회원 도로명 주소 -->
+								
+								<!-- 회원 지번 주소 -->
+								<div id="jibun_address_fld_pnl" class="input-group d-flex">
+									<div class="fld_label input-group-text">
+										<label for="memberJibunAddress">지번 주소</label>
+									</div>
+									<div class="fld_content">
+										<input class="form-control form-control_update" type="text" id="memberJibunAddress" name="memberJibunAddress" style="width:500px" th:field="*{memberJibunAddress}"/>
+									</div>
+								</div>
+								<!-- // 회원 기본 주소(도로명 + 지번 주소) -->
+								
+								<!-- 회원 상세 주소 -->
+								<div id="detail_address_fld_pnl" class="input-group d-flex">
+									<div class="fld_label input-group-text">
+										<label for="memberDetailAddress">상세 주소</label>
+									</div>
+									<div class="fld_content">
+										<input class="form-control form-control_update" type="text" id="memberDetailAddress" name="memberDetailAddress" style="width:400px" th:field="*{memberDetailAddress}"/>
+									</div>
+								</div>
+								<!-- 회원 상세주소 에러 메시징 : 우편번호/기본주소 입력시 상세주소 미입력할 경우 -->
+								<div id="address_fld_err_pnl"></div>
+								<!-- // 회원 상세주소 -->
+								
+								<!-- 히든 필드들 (인자 잘 오고있는지 확인용 겸 멤버아이디 중복점검 용 필드) -->
+								<div>
+									<input type="hidden" id="memberId" name="memberId" th:field="*{memberId}" readonly />
+									<input type="hidden" id="memberPw" name="memberPw" th:field="*{memberPw}" readonly />
+									<input type="hidden" id="memberName" name="memberName" th:field="*{memberName}" readonly />
+									<input type="hidden" id="memberEnabled" name="memberEnabled" th:field="*{memberEnabled}" />
+								</div>
+								<!--// 히든 필드들 -->
+								
+								<!-- 회원 정보 수정/취소 버튼 -->
+								<div id="buttons_fld_pnl">
+									<button id="submit_btn" type="submit" style="width:150px; margin-left:230px; margin-right:45px">회원 정보 수정</button>
+									<button id="reset_btn" type="reset" style="width:150px;">취소</button>
+								</div>
+								<!-- //회원 정보 수정/취소 버튼 -->
+								
+							</form><!-- frm -->
+							
+						</div><!-- frm_wrap -->
+						
+					</div><!-- form_content_box -->
+					
+				</div><!-- form_content_pnl (회원 정보 수정 부분) -->
+				
+			</div><!-- fav_section -->
+			
+		</div><!-- content_wrapper_mypage -->
+		
+	</div><!-- section -->
+	
+</div><!-- content -->
+	
+</body>
+</html>

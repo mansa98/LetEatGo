@@ -1,0 +1,134 @@
+plugins {
+	id 'java'
+	id 'war'
+	id 'org.springframework.boot' version '3.1.8'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.mbc'
+version = '1.0'
+
+java {
+	sourceCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+	
+	// 주의) 자체 로깅 시스템(logback) 제거 --> log4j2 대체
+	all {
+		// exclude group : 'org.springframework.boot', module: 'spring-boot-starter-logging'
+		exclude module: 'spring-boot-starter-logging'
+	}
+}
+
+repositories {
+	mavenCentral()	
+}
+
+dependencies {
+	// JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// JAVA MAIL SENDER
+	//implementation 'org.springframework.boot:spring-boot-starter-mail'
+	// OAUTH(구글, 네이버)
+	//implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	// 기본 SECURITY
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	// 타임리프
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	// 기본설정 웹
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	// 마이바티스
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+	// 시큐리티(세션)
+	implementation 'org.springframework.session:spring-session-core'
+	// 시큐리티
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+	// 롬복
+	compileOnly 'org.projectlombok:lombok'
+	// 기본설정
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	// JDBC
+	runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
+	// 롬복
+	annotationProcessor 'org.projectlombok:lombok'
+	// 내장 톰캣
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	// 테스트(스프링부트테스트)
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	// 시큐리티
+	testImplementation 'org.springframework.security:spring-security-test'
+	
+	// log4j2
+	implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+	// webjars: 인터넷 연결없이 라이브러리를 사용할 수 있게 로컬에 Jar파일을 생성해주는 디펜던시
+	// jQuery(자바스크립트 이벤트 특화 라이브러리)
+    implementation 'org.webjars:jquery:3.7.1'
+    
+    // jQueryUI
+    implementation 'org.webjars:jquery-ui:1.12.1'
+    
+    // bootstrap
+    implementation 'org.webjars:bootstrap:5.3.1'
+    
+    // webjars javascript 자동 버전 관리
+    implementation 'org.webjars:webjars-locator-core:0.46'
+    
+    // log4jdbc(로그 출력 혹은 저장)
+    implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
+    
+    // thymeleaf layout dialect(레이아웃 돌려쓰기)
+	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.1.0'
+	
+	// spring security taglib(JSP에서 시큐리티 사용(설정)위해 추가하는 디펜던시)
+	implementation 'org.springframework.security:spring-security-taglibs'
+	
+	// spring session jdbc(연결, 사용 유지시간 관련)
+	implementation 'org.springframework.session:spring-session-jdbc'
+	
+	// REST Test springdoc(swagger)
+	// https://springdoc.org/
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+	
+	// AJAX axios(비동기식 전송: 실시간 업데이트(새로고침 없이))
+	implementation 'org.webjars.npm:axios:1.5.0'	
+	
+	// bootstrap icons(부트스트랩 아이콘 임포트)
+	implementation 'org.webjars.npm:bootstrap-icons:1.11.1'	
+	
+	// thymeleaf dialect
+	// https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect
+	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.3.0'
+
+	// https://mvnrepository.com/artifact/org.jsoup/jsoup
+	implementation 'org.jsoup:jsoup:1.16.1'
+	
+	// 폼 유효성 점검
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	//////////////////////////////////////////////////////////////////////////////
+		
+	// 게시판에서 추가된 요소
+	// summernote
+	implementation 'org.webjars.npm:summernote:0.8.18'
+	
+	implementation 'commons-fileupload:commons-fileupload:1.5'
+	
+	// summernote image → Image Resize(이미지 크기 재조정) library(라이브러리) 
+	// site : https://github.com/rkalla/imgscalr
+	// library : https://mvnrepository.com/artifact/org.imgscalr/imgscalr-lib
+	// API referece doc : https://javadoc.io/doc/org.imgscalr/imgscalr-lib/latest/index.html
+	implementation 'org.imgscalr:imgscalr-lib:4.2'	
+	
+}
+
+tasks.named('bootBuildImage') {
+	builder = 'paketobuildpacks/builder-jammy-base:latest'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

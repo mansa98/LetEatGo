@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko-kr"
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>문의사항</title>
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+<script>
+window.onload = function() {
+		
+	// 게시글의 체크 박스들 전체 선택용 "체크 박스(최상단)" 이벤트 처리
+	let checkboxes = document.querySelectorAll("[id^=check_]"); // 체크 박스들
+	let mainCheckbox = checkboxes[0];
+	
+	// 삭제 버튼을 눌렀을 경우 
+	let inqDeletebtn = document.getElementById("inq_delete_btn");	
+	let deleteExpectedBoardIds = new Array(); // 삭제할 아이디 정보를 담을 배열
+	
+	mainCheckbox.onclick = function() {
+		
+		// 메인 체크 박스 상태 파악 : 체크 여부
+		console.log("메인 체크박스 체크 여부 : ", mainCheckbox.checked);
+				
+ 		for (check of checkboxes) {
+			check.checked = mainCheckbox.checked; // 메인 체크 박스의 상태를 그대로 다른 체크박스들에도 반영
+		} //
+		
+	} //
+	
+	// console.log("inqDeletebtn : ", inqDeletebtn);
+	
+	// 관리자 모드일 경우만 나오는 버튼이므로 일반 모드에는 에러로 오인됨 (추후 처리)
+	inqDeletebtn.onclick = function() {
+		
+		// 체크 박스들 중에서 체크된 체크박스(삭제할 게시글들) 아이디 파악 
+		// 메인 체크 박스(i=0)는 제외 : 개별체크 박스(i=1부터 시작)에서 삭제할 게시글 아이디 추출		
+		for (let i=1; i<checkboxes.length-1; i++) {
+			
+			if (checkboxes[i].checked == true) {
+				
+				let inqNum = checkboxes[i].id.substring('check_'.length)
+				deleteExpectedBoardIds.push(inqNum) // 삭제할 아이디 배열에 등록(적재)
+				// console.log("삭제할 게시글 아이디 :", inqNum);
+				
+			} //
+		} //
+		
+		// 삭제할 게시글 아이디들 확인
+		for (deleteExpectedBoardId of deleteExpectedBoardIds) {
+			
+			console.log("삭제할(선택된) 게시글 아이디 : ", deleteExpectedBoardId);
+		} // for
+		
+	} //
+
+} //
+</script>
+</head>
+
+<style>
+	/* .layout{
+		width : 1000px;
+		margin : 0 auto;
+		margin-top : 100px;
+		position : absolute;
+		top : 30px;
+	}
+	
+	.layout input{
+		width : 100%;
+		box-sizing : inqer-box;
+		margin-top : 10px;
+	}
+	
+	.layout textarea{
+		width : 100%;
+		margin-top : 10px;
+		min-height : 300px;
+	} */
+</style>
+
+<body>
+
+<!-- layout -->
+<div layout:fragment="content" class="content_section list_view_update">
+		<div class="content_section_inq_ntc">
+			<div class="navbar navbar-expand">
+			<ul class="navbar-nav ntc_menu_items menu_name_section">
+				<li><a class="nav-link" th:href="@{/ntc/list.do}"><h2 style="font-family: Pretendard-Regular;">공지사항</h2></a></li>
+				<a class="nav-link"><h2 style="font-family: Pretendard-Regular;">|</h2></a>
+				<li><a class="nav-link" th:href="@{/inq/list.do}"><h2 style="font-family: Pretendard-Regular; text-decoration: underline; text-underline-offset : 10px;">문의사항</h2></a></li>
+			</ul>
+			</div>
+		</div>
+	<div class="layout">
+	<!-- 페이지 현황 -->
+	<!-- <table class="table table-striped" th:if="${pageVO != null}">
+		<tr>
+			<th style="width: 150px;">총 게시글 수</th>
+			<td th:text="${pageVO.listCount}"></td>
+			<th style="width: 150px;">현재 페이지</th>
+			<td th:text="${pageVO.currPage}"></td>
+			<th style="width: 150px;">다음 페이지</th>
+			<td th:text="${pageVO.nextPage}"></td>
+			<th style="width: 150px;">시작 페이지</th>
+			<td th:text="${pageVO.startPage}"></td>
+			<th style="width: 150px;">마지막 페이지</th>
+			<td th:text="${pageVO.endPage}"></td>
+			<th style="width: 150px;">총 페이지 수</th>
+			<td th:text="${pageVO.maxPage}"></td>
+			<th style="width: 150px;"></th>
+			<td th:text="${pageVO.getCurrPage}"></td>
+		</tr>
+	</table> -->
+	
+	<!-- 전체 자유 질문 카테고리 -->
+	<!-- <nav class="navbar navbar-expand">
+		<div class="container-fluid" style="background: orange;">
+			<ul class="navbar-nav">
+				<li><a class="nav-link" th:href="@{/inq/list.do}">전체</a></li>
+				<li><a class="nav-link">|</a></li>
+				<li><a class="nav-link" th:href="@{/inq/categoryList.do?category=자유}">자유</a></li>
+				<li><a class="nav-link">|</a></li>
+				<li><a class="nav-link" th:href="@{/inq/categoryList.do?category=질문}">질문</a></li>
+			</ul>
+		</div>	
+	</nav> -->
+	
+	<!-- 게시글 검색 기능 -->
+	
+	<form th:action="@{/inq/searchList.do}" method="get">
+		<div id="search_pnl">
+			<nav class="navbar navbar-expand">
+				<div class="container-fluid">
+					<ul class="navbar-nav">
+					</ul>
+					<div class="navbar-nav">
+						<select class="form-select" style="width: 100px; text-align:center;" id="searchKey" name="searchKey" aria-label="Default select example">
+						  <option selected value="inq_title">글제목</option>
+						  <!-- <option value="inq_content">글내용</option> -->
+						  <option value="inq_writer">작성자</option>
+						</select>&nbsp;
+						<input type="text" class="form-control" style="width: 300px;" id="searchWord" name="searchWord">&nbsp;
+						<button id="search_btn" class="btn btn-info"><i class="bi bi-search"></i>&nbsp;검색</button>&nbsp;
+						<a sec:authorize="hasRole('ROLE_USER') and !hasRole('ROLE_ADMIN')" th:href="@{/inq/write.do}"
+							class="btn btn-info">글작성</a>
+						<a sec:authorize="hasRole('ROLE_USER') and hasRole('ROLE_ADMIN')" th:href="@{/inq/write.do}"
+							class="btn btn-info">글작성</a>&nbsp;
+							
+						<!-- 0425 관리자 글삭제 -->							
+						<!-- <div>
+							<div sec:authorize="hasRole('ROLE_ADMIN')"> 
+							<a type="button"
+							class="btn btn-info">글삭제</a></div>
+						</div> -->
+					</div>
+				</div>
+			</nav>
+		</div>
+	</form>
+	
+	<table class="table mx-3 mt-3" style="width:79vw;">
+		<thead>
+			<tr>
+				<!-- 체크버튼1 -->
+				<!-- <th sec:authorize="hasRole('ROLE_ADMIN')">
+					<input type="checkbox" th:id="${'check_'+ pageVO.currPage}" th:name="${'check_'+ pageVO.currPage}">
+				</th> -->
+				<th style="width:100px; text-align:center; background-color:#eeeeee;">분류</th>
+				<th style="width:300px; text-align:center; background-color:#eeeeee;">제목</th>
+				<th style="width:100px; text-align:center; background-color:#eeeeee;">작성자</th>
+				<th style="width:100px; text-align:center; background-color:#eeeeee;">작성일</th>	
+				<th style="width:100px; text-align:center; background-color:#eeeeee;">조회수</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:if="${not #lists.isEmpty(inqList) && pageVO.listCount > 0}"
+					th:each="inq, st : ${inqList}">
+				<!-- 체크버튼2 -->
+				<!-- <td sec:authorize="hasRole('ROLE_ADMIN')">
+					<input type="checkbox" th:id="${'check_'+ inq.inqNum}" th:name="${'check_'+ inq.inqNum}">
+				</td> -->	
+				<!-- 분류 -->
+				<td style="text-align:center;">문의</td>
+				<td style="text-align:center; width:300px;">
+				<!-- 제목 -->
+					<a style="text-decoration-line: none; color:black;" th:href="@{'/inq/view.do/'+ ${inq.inqNum}}" th:utext="${inq.inqTitle}"></a>
+					<!-- 글 내용 중 삽입 이미지 존재 여부 -->
+					<span th:if="${#strings.contains(inq.inqContent, 'img')}">
+						<i class="bi bi-card-image"></i>
+					</span>
+					<!-- 업로드 파일 존재 여부 -->
+					<span th:if="${!#strings.isEmpty(inq.inqFile)}">
+						<i class="bi bi-paperclip"></i>
+					</span>
+				</td>
+				<!-- 작성자 -->
+				<td style="text-align:center;" th:text="${inq.inqWriter}"></td>
+				<!-- 작성일 -->
+				<td style="text-align:center;" th:utext="${#dates.format(inq.inqDate, 'yy.MM.dd HH:mm')}"></td>
+				<!-- 조회수 -->
+				<td style="text-align:center;" th:utext="${inq.inqCount}"></td>
+			</tr>
+		</tbody>
+	</table>
+	<!-- admin만 보이게끔 수정? -->
+	<!-- <div style="text-align:right; margin-right:30px;" >
+		<a type="button" class="btn btn-info ms-6" >글 삭제</a>
+	</div> -->
+		
+		<!-- 페이징 -->
+		<!-- 1. 검색이나 카테고리분류 아닌 경우 -->
+		<div class="paging_inq_ntc d-flex justify-content-center mt-5" th:if="${#strings.isEmpty(searchKey)} and ${#strings.isEmpty(category)}">
+			<nav aria-label="Page navigation example">
+  				<ul class="pagination justify-content-center">
+    			<!-- 첫페이지 -->
+    			<li class="page-item"><a class="page-link" th:href="@{'/inq/list.do?currPage=1'}">
+    				<i class="bi bi-chevron-double-left"></i>	
+    			</a></li>
+    			<!-- 이전 페이지 -->
+			    <li class="page-item" th:if="${pageVO.currPage == 1}">
+			      <a class="page-link" aria-label="Previous" aria-hidden="true"><i class="bi bi-chevron-left"></i></a>
+			    </li>
+			    <li class="page-item" th:unless="${pageVO.currPage == 1}">
+			      <a class="page-link" th:href="@{'/inq/list.do?currPage='+${pageVO.prePage}}" aria-label="Previous" aria-hidden="true"><i class="bi bi-chevron-left"></i></a>
+			    </li>
+    			<!-- 페이지가 1개 초과 10이하 일때 분량이 될때 --> 
+    			<li th:if="${1 < pageVO.maxPage}"
+    				th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"  
+    				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+    				<a class="page-link" th:href="@{'/inq/list.do?currPage='+${num}}">[[${num}]]</a>
+    			</li>
+	     		<!-- 한페이지 분량일때 생략가능 -->
+    			<li th:if="${pageVO.maxPage == 1}"
+    				th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"  
+    				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+    				<a class="page-link" th:href="@{'/inq/list.do?currPage='+${num}}">[[${num}]]</a>
+    			</li>
+    			<!-- 게시글이 없을때 -->
+    			<li th:if="${pageVO.maxPage == 0}"
+    				th:each="num : ${#numbers.sequence(pageVO.maxPage,pageVO.maxPage)}"  
+    				th:class="${pageVO.currPage == num ? 'page-item':'page-item'}">
+    				<a class="page-link" href="#">[[${num}]]</a>
+    			</li>
+		    	<!-- 다음 페이지 -->
+			    <li class="page-item" th:if="${pageVO.currPage != pageVO.maxPage}">
+			      <a class="page-link" th:href="@{'/inq/list.do?currPage='+${pageVO.nextPage}}" aria-label="Next" aria-hidden="true"><i class="bi bi-chevron-right"></i></a>
+			    </li>
+			    <!-- 다음페이지 게시글이 없을 경우 -->
+			    <li class="page-item" th:if="${pageVO.currPage == pageVO.maxPage}">
+			      <a class="page-link" href="#" aria-label="Next" aria-hidden="true"><i class="bi bi-chevron-right"></i></a>
+			    </li>
+			    <!-- 마지막 페이지 -->
+			    <li class="page-item" th:if="${pageVO.maxPage != 0}">
+			    <a class="page-link" th:href="@{'/inq/list.do?currPage='+${pageVO.endPage}}">
+			    	<i class="bi bi-chevron-double-right"></i></a>
+			    </li>
+			    <!-- 마지막 페이지가 없을 경우 ex) 게시글 없을 경우 -->
+			    <li class="page-item" th:if="${pageVO.maxPage == 0}">
+			    <a class="page-link" href="#">
+			    	<i class="bi bi-chevron-double-right"></i></a>
+			    </li>
+  			</ul>
+		</nav>
+		</div>
+		
+		<!-- 2. 검색인 경우 -->
+		<form th:action="@{/inq/categoryList.do}" method="get">
+			<div class="paging d-flex justify-content-center mt-5" th:if="${!#strings.isEmpty(searchKey)}">
+				<nav aria-label="Page navigation example">
+		 			<ul class="pagination justify-content-center">
+			   			<!-- <li class="page-item"><a class="page-link" href="${pageVO.currPage}">1</a></li> -->
+			   			<!-- 첫페이지 -->
+			   			<li class="page-item">
+			    			<a class="page-link" 
+			    				th:href="@{'/inq/searchList.do?currPage=1&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="Start">
+			    				<i class="bi bi-chevron-double-left"></i>	
+			    			</a>
+		    			</li>
+			   			<!-- 이전 페이지 -->
+					    <li class="page-item">
+					    	<a class="page-link" th:href="@{'/inq/searchList.do?currPage='+${pageVO.prePage}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="Previous" aria-hidden="true"><i class="bi bi-chevron-left"></i></a>
+					    </li>
+			   			<!-- 페이지가 1개 초과 10이하 일때 분량이 될때 --> 
+			   			<li th:if="${1 <= pageVO.maxPage}"
+			   				th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"  
+			   				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+			   				<a class="page-link" th:href="@{'/inq/searchList.do?searchKey='+${searchKey}+'&searchWord='+${searchWord}+'&currPage='+${num}}">[[${num}]]</a>
+			   			</li>
+			   			<!-- 한페이지 분량일때 생략가능 -->
+			   			<!-- <li th:if="${pageVO.maxPage == 1}"
+			   				th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"  
+			   				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+			   				<a class="page-link" th:href="@{'/inq/searchList.do?searchKey='+${searchKey}+'&searchWord='+${searchWord}+'&currPage='+${num}}">[[${num}]]</a>
+			   			</li> -->
+			   			<!-- 게시글이 없을때 -->
+			   			<li th:if="${pageVO.maxPage == 0}"
+			   				th:each="num : ${#numbers.sequence(pageVO.maxPage,pageVO.maxPage)}"  
+			   				th:class="${pageVO.currPage == num ? 'page-item':'page-item'}">
+			   				<a class="page-link" href="#">[[${num}]]</a>
+			   			</li>
+				    	<!-- 다음 페이지 -->
+					    <li class="page-item" th:if="${pageVO.maxPage != 0}">
+					      <a class="page-link" th:href="@{'/inq/searchList.do?searchKey='+${searchKey}+'&searchWord='+${searchWord}+'&currPage='+${pageVO.nextPage}}" aria-label="Next" aria-hidden="true"><i class="bi bi-chevron-right"></i></a>
+					    </li>
+					    <!-- 다음페이지가 없을 경우 ex)게시글 없을 경우 -->
+					    <li class="page-item" th:if="${pageVO.maxPage == 0}">
+					      <a class="page-link" href="#" aria-label="Next" aria-hidden="true"><i class="bi bi-chevron-right"></i></a>
+					    </li>
+					    <!-- 마지막 페이지 -->
+					    <li class="page-item" th:if="${pageVO.maxPage != 0}">
+					    <a class="page-link" th:href="@{'/inq/searchList.do?searchKey='+${searchKey}+'&searchWord='+${searchWord}+'&currPage='+${pageVO.endPage}}">
+					    	<i class="bi bi-chevron-double-right"></i></a>
+					    </li>
+					    <!-- 마지막 페이지가 없을 경우 ex) 게시글 없을 경우 -->
+					    <li class="page-item" th:if="${pageVO.maxPage == 0}">
+					    <a class="page-link" href="#">
+					    	<i class="bi bi-chevron-double-right"></i></a>
+					    </li>
+		 			</ul>
+				</nav>
+			</div>
+		</form>
+		
+	</div>
+</div>
+</body>
+</html>

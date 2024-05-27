@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>LET EAT GO: 선호 / 비선호 재료 선택!</title>
+
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<!-- axios  -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+	/* 유저가 confirm 창에서 "확인"을 눌렀을때 실행할 함수 */
+	function onConfirmed() {
+		/* 전송을 위해 html에서 form 가져오기 */
+		let surveyForm2 = document.getElementById("survey_form");
+		/* 가져온 form을 이용하여 FormData 형성 */
+		let checkForm2 = new FormData(surveyForm2); 
+		
+		/* post 방식의 axios => 컨트롤러 전송 */
+		axios.post(`/survey/confirmSurvey`, checkForm2
+				/* {
+			    		params: {
+			      			check1 : check1.value,
+			      			check2 : check2.value
+			    		}
+				} */)
+				
+			 /* axios 전송이 성공했을때 (HttpStatus.200) */
+			 .then(function(response) {
+				
+				// console.log("서버 응답 : " + JSON.stringify(response));
+				
+				/* 컨트롤러로부터 돌려받은 response의 내용 */
+				alertMessage = response.data;
+				
+				console.log("response.data : " + alertMessage);
+
+				alert(alertMessage);
+				
+				/* 최종적으로 페이지 이동 */
+				location.href="[[@{/}]]"
+			 })
+			 
+			 /* axios 전송이 실패했을때 (HttpStatus.200 외) */
+			 .catch(function(err) {
+				console.error("서버 에러가 발견되었습니다." + err);
+			 });
+		
+		
+		// e.preventDefault(); // 페이지 이동 방지
+	}
+
+	window.onload = function(){
+		
+		console.log("JS is active");
+		
+		/* form 안의 checkbox 덩어리(2개)를 각각의 name을 이용해 가져오기 */
+		let check1 = document.getElementsByName("check1");
+		let check2 = document.getElementsByName("check2");
+		/*
+		console.log(check1.length);
+		
+		console.log(check1[1]);
+		console.log(check2[1]);
+		*/
+		
+		/* 유저가 선호/비선호 재료를 선택할때 중복 방지! From checkbox1 to checkbox2 */
+		let banRepeatFrom1 = function() {
+			
+			/* checkbox1의 크기만큼 */
+			for (let i = 0; i < check1.length; i++) {
+				
+				/* checkbox1의 i번째 요소가 체크가 되었을때 */
+				if (check1[i].checked == true) {
+					
+					/* checkbox2의 i번째 요소를 비활성화(선택못함) 시킴 */
+					check2[i].disabled = true;
+				/* checkbox1의 i번째 요소가 체크 해제되었을때! */
+				} else {
+					/* checkbox2의 i번째 요소 비활성화 해제! */
+					check2[i].disabled = false;
+				}
+				
+			}
+			
+			
+		}// banRepeatFrom1()
+		
+		/* banRepeatFrom1과 로직이 동일하다! except: From checkbox2 to checkbox1 */
+		let banRepeatFrom2 = function() {
+			
+			for (let i = 0; i < check2.length; i++) {
+				
+				if (check2[i].checked == true) {
+					
+					check1[i].disabled = true;
+				} else {
+					
+					check1[i].disabled = false;
+				}
+				
+			}
+			
+		}// banRepeatFrom2()
+		
+		/* checkbox1의 모든 요소에 중복 선택 방지 함수 적용! */
+		for (chk of check1) {
+			
+			chk.addEventListener("click", banRepeatFrom1)
+			
+		}
+		/* checkbox2의 모든 요소에 중복 선택 방지 함수 적용! */
+		for (chk of check2) {
+			
+			chk.addEventListener("click", banRepeatFrom2)
+			
+		}
+		
+		/* check1.addEventListener("click", function(){
+			
+			
+			if (check1.checked == true) {
+				
+				alert("체크되었음");
+				
+				check2.disabled = true;
+				check3.disabled = true;
+				check4.disabled = true;
+			} else {
+				
+				check2.disabled = false;
+				check3.disabled = false;
+				check4.disabled = false;
+				
+			}
+			
+		}); */
+		
+		////////////////////////////////////////////////////////////////////////////
+		
+		/* 전송용 Form 가져오기(html에서) */
+		let surveyForm = document.getElementById("survey_form");
+		
+		console.log("surveyForm은 존재하는가?" + surveyForm);
+		/* 제출용(submit) 버튼 html에서 가져오기 */
+		/* AJAX 전송은 form 전송이 submit 방식이 아니다! */
+		let btn = document.getElementById("button_submit");
+		
+		let alertMessage= "";
+		
+		
+		/* 위에서 가져온 버튼을 클릭시 실행할 함수 */
+		btn.onclick = function(e) {
+			
+			// alert("전송");
+			
+			/* let check1 = document.getElementsByTagName("check1");
+			let check2 = document.getElementsByTagName("check2"); */
+			
+			/* form 안에서 id값에 "check"를 포함한 모든 요소 가져오기 */
+			let checks = document.querySelectorAll("[id^=check]");
+			
+			/* checks의 모든 요소에 대해 value와 체크여부 콘솔에 출력해보기 */
+			for (let ch of checks) {
+				console.log(ch.value);
+				console.log(ch.checked);
+			}
+			
+			// console.log("checks: " + checks);
+			
+			/* html 에서 가져온 form을 이용해 FormData(form통째로 컨트롤러로 전송하는 형태) 형성 */
+			let checkForm = new FormData(surveyForm);
+			
+			console.log("checkForm은 존재하나?" + checkForm.innerHTML)
+			
+			
+			/* axios: post 방식으로 컨트롤러로 전송, 전송하는 데이터는 FormData() */
+			axios.post(`/survey/chkSurvey`, checkForm
+				/* {
+			    		params: {
+			      			check1 : check1.value,
+			      			check2 : check2.value
+			    		}
+				} */)
+			 
+			 /* axios 전송이 성공적일때 (200) */
+			 .then(function(response) {
+				
+				// console.log("서버 응답 : " + JSON.stringify(response));
+				
+				// 데이터베이스에 해당 유저의 LAD 데이터가 존재하지 않았을때!(최초 등록일때)
+				if(response.data == "선호/비선호 데이터를 최초로 저장합니다.") {
+					
+					alertMessage = "※ SYSTEM: lad_tbl에 선호/비선호 재료가 성공적으로 저장되었습니다."
+					
+					alert(alertMessage);
+					
+					location.href="[[@{/}]]"
+					
+				} else if (response.data == "선호/비선호 데이터가 이미 존재합니다.") {
+					
+					alertMessage = "※ SYSTEM: 선호/비선호 재료 리스트를 새롭게 업데이트합니다. 계속하시려면 \"확인\" 취소하시려면 \"취소\"를 누르세요."
+				}
+				console.log("※alertMessage는: " + alertMessage);
+				//TODO
+				// 데이터베이스에 이미 유저의 선호/비선호 재료 데이터가 존재할때!!
+				if(response.data == "선호/비선호 데이터가 이미 존재합니다.") { 
+				
+					/* 유저에게 최종 확인용(업데이트 진행 / 취소) confirm창 출력 */
+					if(confirm(alertMessage) == true) {
+						/* 유저가 "확인"을 선택했을때 함수(이 페이지 맨 위 부분에 정의함) 실행 */
+						onConfirmed();
+						
+						
+					} else {
+						alert("변경을 취소하셨습니다.")
+						//e.preventDefault();
+					}
+				}
+			 })
+			 .catch(function(err) {
+				alert("'즐겨찾는' 재료와 '기피하는' 재료를 먼저 선택해주세요!");
+				console.error("서버 에러가 발견되었습니다." + err);
+			 });
+			
+			
+			
+			//e.preventDefault();//전송 방지
+			
+			
+		}
+		
+	}
+
+</script>
+<style>
+* {
+	font-family: Pretendard-Regular;
+}
+
+.content_section_survey {
+	/* background-color: cyan; */
+	margin: 0;
+	/* background: blue; */
+	width: 100%;
+	min-height: inherit;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+/* .survey_whole_screen {
+	margin: 0;
+	width: 100%;
+	min-height: calc(100vh-149px);
+	background: yellowgreen;
+	background-image: url("../images/cupcake-on-a-plate-surrounded-by-fruits.jpg");
+	background-size: 100% 100%;
+} */
+
+#survey_form {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.survey_form_section {
+	/* background: pink; */
+	margin: 0;
+	width: calc(100% - 300px);
+	min-height: calc(100vh - 300px);
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+
+.survey_form_section hr{
+	margin-top: 20px;
+}
+
+
+.menu_name_section_survey {
+	margin: 0;
+	font-size: 2.5em;
+	font-family: Pretendard-Regular;
+	padding: 50px 0 0 200px;
+	width: 100%;
+	height: 200px;
+	/* background: coral; */
+}
+
+.survey_section_wrapper1 {
+	/* background: #eee; */ 
+	height: inherit;
+	width: 45%;
+	margin-right: 100px;
+}
+
+.form_title {
+	font-size: 2em;
+	font-family: Pretendard-Regular;
+	text-align: center;
+	/* text-decoration: underline; */ 
+}
+
+.survey_section_wrapper2 {
+	/* background: orange; */
+	height: inherit;
+	width: 45%;
+	margin: 0;
+}
+
+.submit_section {
+	width: 350px;
+	/* background: green; */
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	/* padding: 0 10px 0 10px; */
+}
+
+.submit_section button {
+	font-family: sans-serif;
+	font-size: 1.5em;
+	margin: 0 15px 0 15px;
+}
+
+.form-check-input {
+	margin-left: 65px;
+}
+
+.form_check_label {
+	font-size: 20px;
+	width: 80px;
+}
+
+.check_form {
+	/* background: red; */
+	color: black;
+	display: flex;
+	flex-direction: row;
+	align-items: space-evenly;
+	border-radius: 5%;
+	margin-left: 10px;
+}
+
+.check_form_wrapper {
+	padding: 20px 0 20px 0;
+	background: #eee;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	border-radius: 2%;
+	margin-top: 10px;
+}
+
+/* .check_form_wrapper:nth-child(2n+1) {
+	background: #eee;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	
+}
+
+.check_form_wrapper:nth-child(2n) {
+	background: #eee;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	
+} */
+
+
+</style>
+
+</head>
+<body>
+
+	<div layout:fragment="content" class="content_section">
+		<div class="content_section_survey">
+			<div class="menu_name_section">
+				<h2>설문조사</h2>
+			</div>
+			<form id="survey_form" method="post" th:action="@{'/survey/survey.do'}"> 
+				<div class="survey_form_section">
+					<div class="survey_section_wrapper1">
+						<p class="form_title">평소 <span style="color: #0DCAF0">즐겨드시는</span> 재료를 선택해주세요</p>
+						<fieldset class="form_fieldset">
+							<div class="check_form_wrapper">
+								<div th:each="ingr, ingrStat : ${ingrList}" class="form_check check_form p-3">
+									<input class="form-check-input" type="checkbox" th:id="check + ${ingrStat.count}" th:name="check1" th:value="${ingr.ingrMainName}">
+									<label class="form-check-label ms-2 form_check_label" th:for="check + ${ingrStat.count}" th:text="${ingr.ingrMainName}"></label>
+								</div>
+							</div>
+						</fieldset>
+					</div>
+					<div class="survey_section_wrapper2">
+						<p class="form_title">평소 <span style="color: red">기피하시는</span> 재료를 선택해주세요</p>
+							<fieldset class="form_fieldset">
+								<div class="check_form_wrapper">
+									<div class="form_check check_form p-3" th:each="ingr, ingrStat : ${ingrList}">
+										<input class="form-check-input" type="checkbox" th:id="${'check' + (ingrStat.size + ingrStat.count)}" th:name="check2" th:value="${ingr.ingrMainName}">
+										<label class="form-check-label ms-2 form_check_label" th:for="${'check' + (ingrStat.size + ingrStat.count)}" th:text="${ingr.ingrMainName}"></label>
+									</div>
+								</div>
+							</fieldset>
+					</div>
+					
+				</div>
+				<div class="submit_section mb-5 mt-5">
+					<button class="btn btn-sm" style="background-color: #91E3F0; font-size:1.2em; padding: 10px 15px 10px 15px;" id="button_submit" type="button"><span>제출하기</span></button>
+					<button class="btn btn-sm" style="background-color: #DFDFDF; font-size:1.2em; padding: 10px 15px 10px 15px;" type="reset" onclick="location.href='/survey/'"><span>다시하기</span></button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+<!-- 				<div class="temp_section" th:each="ingr : ${ingrList}">
+					<p th:text="${ingr.mainIngrNum} + ${ingr.mainIngrName}"></p>
+					<p th:text="${ingr.mainIngrName}"></p>
+				</div> -->
+
+
+
+</body>
+</html>

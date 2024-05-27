@@ -1,0 +1,125 @@
+@charset "UTF-8";
+
+*{
+	
+	font-size:1em;
+	
+}
+
+.content_section_ranking {
+	/* background-color: cyan; */
+	width: 100%;
+	min-height: inherit;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.menu_name_section {
+	/* background: yellow; */
+	/* margin-top: 80px;
+	margin-left: 640px;
+	margin-bottom: 80px; */
+	text-align: left;
+	width: 100%;
+	height: 150px;
+	font-size: 2.5em;
+	font-family: Pretendard-Regular;
+	padding: 50px 0 0 200px;
+}
+
+.content_wrapper_ranking {
+	margin-top: 10px;
+	/* background-color: green; */
+	width: calc(100% - 100px);
+	min-height: calc((100vh - 149px) - 100px);
+	/* height: fit-content; */
+	display: flex;
+	justify-content: center;
+}
+
+
+
+#testwriter{
+	
+	position:relative;
+	
+}
+
+.testimg {
+	
+	
+	display: flex;
+	width: 80vw;
+	height: auto;
+ 	background-repeat: no-repeat; 
+    background-position: center center; 
+    background-size: cover;
+    position:relative;
+}
+
+.testwriter {
+	
+	color: #FFF;
+	background-color: black;
+	opacity: 0.7;
+	position:absolute;
+	right:0;
+}
+
+#testrank-1 {
+	
+	font-size:2rem;
+	color: #FFF;
+	background-color: black;
+	opacity: 0.8;
+	width:40px;
+	height:45px;
+	text-align:center;
+	margin-left: 0px;
+}
+
+#testrank-2 {
+	
+	font-size:2rem;
+	color: #FFF;
+	background-color: black;
+	opacity: 0.8;
+	width:40px;
+	height:45px;
+	text-align:center;
+	margin-left: -12px;
+	
+}
+
+#recipe_cocu {
+	
+	text-align: end;
+	margin-right: 9px;
+}
+
+#recipe_cocu_bo{
+
+	position: absolute;
+	bottom: 100px;
+}
+
+#recipe_cocu_bo:nth-child(1n) {
+
+	bottom: 60px;
+	right: 20px;
+	
+}
+
+#recipe_cocu_bo:nth-child(2n) {
+	
+	
+	bottom: 40px;
+	right: 20px;
+}
+
+.two_to_five {
+	
+	padding-left: 28.9px;
+}

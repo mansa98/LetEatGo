@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>LET EAT GO ♬</title>
+
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<!-- <script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script> -->
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<!-- axios  -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<!-- welcom 페이지 외장 css -->
+<link rel="stylesheet" th:href="@{/css/welcome_css.css}">
+<!-- Initialize Swiper -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+<script>
+
+function movePage(prm) {
+	var pageElement = prm;
+	location.href="/recipe/detailpage?recipeNum=" + pageElement;
+}
+	window.onload = function() {
+		
+		
+		
+		
+		
+		// welcome 컨트롤러에서 추가한 모델
+		let userid = "[[${id}]]";
+		
+		// welcome 컨트롤러에서 추가한 모델
+		let memberNick = "[[${memberNick}]]"
+		
+		console.log("userid:", userid);
+		console.log("memberNick: ", memberNick);
+		
+		// 추후 업데이트: 유저 로그인 직후에만 단 한번 alert 띄우기
+	
+		
+		
+		// 설문조사 페이지로 이동하는 링크 요소 가져오기
+		/* let surveyLink = document.getElementById("survey_link"); */
+		
+		// console.log("링크:" + surveyLink.innerHTML);
+		
+		// 설문조사로 이동하는 링크를 클릭했을때 실행 함수
+		/* surveyLink.onclick = function() {
+			
+			// 로그인 하지 않았을때
+			if (userid == "anonymousUser") {
+				
+				alert("먼저 로그인 해주세요!");
+				// 로그인 페이지로 이동
+				location.href="[[@{/member/login}]]";
+			} else {
+				// 설문조사 페이지로 이동
+				location.href="[[@{/survey/}]]";
+			}
+			
+		}// onclick */
+		
+		let mypage = document.getElementById("mypage");
+		console.log("★ mypage : " + mypage);
+		
+		let user_id = "[[${#authentication.principal}]]";
+		console.log("★user_id : " + user_id);
+		
+		mypage.onclick = function() {
+			if(user_id == 'anonymousUser') {
+				alert("로그인이 필요한 서비스입니다.");
+				location.href="@{/member/login}";
+			}
+		}
+				
+		// 추천 레시피 출력받는 버튼
+		let get_recomm_btn = document.querySelector(".get_recomm_btn");
+
+        console.log("recomm_btn: " + get_recomm_btn.innerHTML)
+        
+        // let recomm_btn_wrapper = document.getElementById("modal_btn_wrapper");
+		
+        // 모달 전체 내용
+		let my_modal = document.getElementById("myModal");
+        
+        // 추천시스템 모달을 띄우는 버튼
+		let recomm_btn = document.querySelector(".recomm_link1");
+		
+        // welcome 컨트롤러에서 추가한 ladVO 모델
+		let lad_data = "[[${ladVO}]]";
+		
+		console.log("ladVO 존재??" + lad_data);
+        
+		// 추천시스템 모달을 띄우는 버튼을 클릭했을때
+        recomm_btn.onclick = function() {
+        	
+        	// 로그인 하지 않았을때
+			if (userid == "anonymousUser") {
+				
+				// 모달 팝업 방지
+				my_modal.style.display = "none";
+				// recomm_btn_wrapper.innerHTML = ``;
+				alert("로그인이 필요한 서비스입니다!");
+				
+				// 로그인 페이지로 이동(컨트롤러내에 session이 null이면 로그인 페이지로 redirect 시키는 코드가 있음)
+				location.href="[[@{/member/login}]]";
+			}
+        	
+        	// 로그인 상태이고, 로그인한 유저의 lad(선호/비선호 재료)데이터가 존재하지 않을때!(설문조사를 한번도 실시하지 않았을때)
+        	if (userid != "anonymousUser" && lad_data == "") {
+        		let confirm_msg = "선호/비선호 재료 데이터가 존재하지 않습니다! 지금 데이터를 등록하시려면 확인을, 나중에 하시려면 취소를 눌러주세요.";
+        		
+        		// 모달 팝업 방지
+        		my_modal.style.display = "none";
+        		
+        		// confirm창 출력: "확인"누르면 설문조사 페이지로 이동시킴, "취소"누르면 welcome페이지로 이동
+        		if(confirm(confirm_msg)==true) {
+        			
+        			location.href="[[@{/survey/}]]";
+        		} else {
+        			
+        			location.href="[[@{/}]]";
+        		}
+        	}
+        	
+        }// onclick
+		
+        // axios 통신 성공여부 확인용 메세지 인자
+		let request_msg = "request:해줘";
+		
+		console.log("recomm_btn: " + recomm_btn.innerHTML);
+		//console.log("request_msg:" + request_msg);
+		
+		// 추천 레시피 출력받는 버튼을 클릭했을때 실행
+		get_recomm_btn.onclick = function(e) {
+			
+			console.log("request_msg:" + request_msg);
+			
+			// 0504 여기서 로딩스피너 로딩중이다 보여줘야 해요
+			  document.getElementsByClassName('spinner')[0].style.display='block';
+			// ('/recomm/getRecomm) 컨트롤러 매핑주소로 request_msg 인자를 태워서 axios 전송!'
+			axios.post(`/recomm/getRecomm`, 
+					{
+						request_msg: request_msg
+					}
+			// axios 통신이 성공했을때 처리되는 부분
+			
+			).then(function(response){
+				console.log("전송 성공?" + response.data);
+				alert("성공이다");
+				// RestController에서 리턴한 데이터(추천 레시피 리스트)
+				let recomm = response.data;
+				console.log(recomm[0].recipeTitle);
+				// 모달의 body 부분
+				let result_modal = document.querySelector("#myModal .modal-body #modal_body_content");
+				
+				// 모달 body 부분에 추가할 동적 html 초기화
+				let recomm_result = "";
+				
+				// 기존 내용 다 날려!
+				result_modal.innerHTML = ``;
+				
+				document.getElementsByClassName('spinner')[0].style.display='none';
+				
+				// 추천 레시피 리스트의 크기만큼
+				for (let i = 0; i < recomm.length; i++) {
+					
+					// 동적 html 생성
+					recomm_result = 
+					`<div class="recipe_box">
+                        <span class="box_num"># ${i+1}</span>
+                        <a href="recipe/detailpage?recipeNum=${recomm[i].recipeNum}" title="클릭하여 상세 페이지로 이동하기!"><img src=${recomm[i].recipeImage}></a>
+                        <p>${recomm[i].recipeTitle}</p>
+                        <span class="writer_span">by ${recomm[i].recipeOgWriter}</span> 
+                    </div>`;
+					
+                    // modal body 부분의 html에 동적 html을 for문을 돌때마다 추가(th:each와 비슷한 느낌)
+					result_modal.innerHTML += recomm_result;
+				}
+				
+			// axios 통신이 실패했을때 처리되는 부분	
+			}).catch(function(err) {
+				
+				console.log("R컨트롤러에 도달 실패" + err);
+			});
+			
+			
+			
+			
+		}// onclick
+		
+	}
+	
+	
+
+</script>
+<style>
+   :root {
+    --swiper-theme-color: white;
+    }
+    
+    .swiper {
+      width: 100%;
+      height: 650px;
+      border-radius:1em;
+    }
+
+    .swiper-slide {
+      text-align: center;
+      font-size: 18px;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .swiper-slide img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .swiper {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    
+    .main_txt1 {
+	font-family: "Pretendard-Regular";
+	font-size: 3em;
+	font-weight: bold;
+	color:#393939;
+	margin-left: 47px;
+	margin-bottom:0px;
+	/* text-align: center; */
+	}
+	
+	.main_txt2 {
+		font-family: "Pretendard-Regular";
+		font-size: 3em;
+		font-weight: bold;
+		color: #aaa;		/* text-align: center; */
+		margin-left: 47px;
+		
+	}
+	
+	/* 컨텐츠 영역 래퍼 왼쪽 아래 박스 1 */
+	.box1 {
+		background: #e2e2e2;
+		border-radius:5px;
+		cursor: pointer;
+		width: 265px;
+	}
+
+	.box1 p {
+		background-image: url("../images/animal_cooking_girl_neko.png");
+		background-size: 100% 100%;
+		width: 100%;
+		height: 300px;
+		margin:auto;
+		margin-top: 40px;
+	}
+	
+	h3{
+	width: 100%;
+	height:50px;
+	color: #000;
+	text-align : right;
+	/* margin-top:15px; */
+	padding-right:6px;
+	padding-top:20px;
+	font-size:26px;
+	}
+	/* 컨텐츠 영역 래퍼 왼쪽 아래 박스 2 */
+	.box2 {
+		background: #e2e2e2;
+		border-radius:5px;
+		cursor: pointer;
+		width: 265px;
+	}
+	
+	.box2 p{
+		width: 100%;
+		height: 300px;
+		background-image: url("../images/job_chef_man.png");
+		background-size: 100% 100%;
+		margin:auto;
+		margin-top: 40px;
+	}
+	
+	.layerPopup {
+    
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    margin: -30px 0 0 -30px;
+}
+.spinner {
+	display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spinner 2s linear infinite;
+}
+@keyframes spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+	
+  </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+	<div class="content_section">
+		<div class="content_wrapper row">
+			<div class="left col-6">
+				<div class="left_upper">
+					<p class="main_txt1">선호하는 재료를 골라</p>
+					<p class="main_txt2">맛있는 요리를 추천받으세요</p>
+				</div>
+				
+				<div class="left_lower row ms-1">
+					<div class="box1 col-4 ms-5 recomm_link1" data-bs-toggle="modal" data-bs-target="#myModal">
+						<h3>레시피 추천 받기</h3>
+						<p id="modal_btn_wrapper"><a></a></p>
+					</div>
+					
+					<div class="box2 col-4 ms-5" th:onclick="|location.href='@{/ranking/}'|">
+						<h3>랭킹 보기</h3>
+						<p><a th:href="@{/ranking/}" class="recomm_link2"></a></p>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Swiper  -->
+			<!-- <div class="right col-6">
+				<div class="right_upper">
+					 <div class="swiper mySwiper">
+					    <div class="swiper-wrapper">
+					      <div class="swiper-slide"><img th:src="@{/images/69068_2873_1455.jpg}"></div>
+					      <div class="swiper-slide"><img th:src="@{/images/1000000869_11.jpg}"></div>
+					      <div class="swiper-slide"><img th:src="@{/images/1000011137_4.jpg}"></div>
+					      <div class="swiper-slide"><img th:src="@{/images/japan.jpg}"></div>
+					      <div class="swiper-slide"><img th:src="@{/images/ss.jpg}"></div>
+					    </div>
+					    <div class="swiper-button-next"></div>
+					    <div class="swiper-button-prev"></div>
+					    <div class="swiper-pagination"></div>
+					  </div>
+				</div>
+				
+			</div> --> <!-- //Swiper  -->
+			
+			<div class="right col-6">
+				<div class="right_upper">
+					 <div class="swiper mySwiper">
+					    <div class="swiper-wrapper">
+					    <!-- th:onclick="|javascript:movePage('${fav.recipeNum}')|" --> 
+					      <!-- <div class="swiper-slide"><img th:src="@{/images/69068_2873_1455.jpg}"></div> -->
+					      <div th:onclick="|javascript:movePage('${recipeList[0].recipeNum}')|" class="swiper-slide"><img th:src="${recipeList[0].recipeImage}"></div>
+					      <div th:onclick="|javascript:movePage('${recipeList[1].recipeNum}')|" class="swiper-slide"><img th:src="${recipeList[1].recipeImage}"></div>
+					      <div th:onclick="|javascript:movePage('${recipeList[2].recipeNum}')|" class="swiper-slide"><img th:src="${recipeList[2].recipeImage}"></div>
+					      <div th:onclick="|javascript:movePage('${recipeList[3].recipeNum}')|" class="swiper-slide"><img th:src="${recipeList[3].recipeImage}"></div>
+					      <div th:onclick="|javascript:movePage('${recipeList[4].recipeNum}')|" class="swiper-slide"><img th:src="${recipeList[4].recipeImage}"></div>
+					    </div>
+					    <div class="swiper-button-next"></div>
+					    <div class="swiper-button-prev"></div>
+					    <div class="swiper-pagination"></div>
+					  </div>
+				</div>
+			</div><!-- right -->
+		</div><!-- //content_wrapper -->
+		
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+	
+	var swiper = new Swiper(".mySwiper", {
+	  slidesPerView: 1,
+	  spaceBetween: 30,
+	  centeredSlides: true,
+	  loop: true,
+	  autoplay: {
+	      delay: 3000,
+	      disableOnInteraction: false,
+	    },
+	  pagination: {
+	    el: ".swiper-pagination",
+	    clickable: true,
+	  },
+	  navigation: {
+	    nextEl: ".swiper-button-next",
+	    prevEl: ".swiper-button-prev",
+	  },
+	});
+
+</script>
+<!-- Initialize Swiper -->	
+		
+	</div><!-- //content_section -->
+	
+	<!-- --------------------------------------------------------------------------------------- -->
+	
+	<!-- The Modal -->
+	<div class="modal" id="myModal">
+	  <div class="modal-dialog modal-fullscreen">
+	    <div class="modal-content">
+	
+	      <!-- Modal Header -->
+	      <div class="modal-header">
+	        <h4 class="modal-title">[[${memberNick}]]유저님! 당신을 위한 레시피는!</h4>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+	      </div>
+	
+	      <!-- Modal body -->
+	      <div class="modal-body modal_body">
+	      	<div id="modal_body_content">
+	      		<p class="before_btn_click">"[[${memberNick}]]" 유저님에게 안성맞춤인 추천 레시피들을 보시려면 아래 "추천 받기!" 버튼을 클릭해주세요!</p>	
+	      	</div>
+	      </div>
+	      
+	        <div id="layerPopup">
+		    	<div class="spinner"></div>
+		  	</div>
+	
+	      <!-- Modal footer -->
+	      <div class="modal-footer bg-dark">
+	      	<button type="button" class="btn btn-success get_recomm_btn me-3">추천 받기!</button>
+	        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">나가기</button>
+	      </div>
+	
+	    </div>
+	  </div>
+	</div><!-- //modal -->
+	
+	
+	
+</div><!-- //fragment -->
+
+
+
+
+
+
+</body>
+</html>

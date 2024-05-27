@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>LET EAT GO ♬</title>
+
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<!-- <script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script> -->
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<!-- axios  -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<!-- welcom 페이지 외장 css -->
+<link rel="stylesheet" th:href="@{/css/welcome_css.css}">
+<!-- Initialize Swiper -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+<!-- Initialize Swiper -->
+	  var swiper = new Swiper(".mySwiper", {
+	    slidesPerView: 1,
+	    spaceBetween: 30,
+	    centeredSlides: true,
+	    loop: true,
+	    autoplay: {
+	        delay: 3000,
+	        disableOnInteraction: false,
+	      },
+	    pagination: {
+	      el: ".swiper-pagination",
+	      clickable: true,
+	    },
+	    navigation: {
+	      nextEl: ".swiper-button-next",
+	      prevEl: ".swiper-button-prev",
+	    },
+	  });
+
+	window.onload = function() {
+		// welcome 컨트롤러에서 추가한 모델
+		let userid = "[[${id}]]";
+		
+		// welcome 컨트롤러에서 추가한 모델
+		let memberNick = "[[${memberNick}]]"
+		
+		console.log("userid:", userid);
+		console.log("memberNick: ", memberNick);
+		
+		// 추후 업데이트: 유저 로그인 직후에만 단 한번 alert 띄우기
+		if (memberNick == "") {
+
+			console.log("방문자님 안녕하세요");
+		} else if (memberNick != "") {
+			
+			alert(memberNick + "님 환영합니다!");
+		}// if
+		
+		
+		// 설문조사 페이지로 이동하는 링크 요소 가져오기
+		let surveyLink = document.getElementById("survey_link");
+		
+		// console.log("링크:" + surveyLink.innerHTML);
+		
+		// 설문조사로 이동하는 링크를 클릭했을때 실행 함수
+		surveyLink.onclick = function() {
+			
+			// 로그인 하지 않았을때
+			if (userid == "anonymousUser") {
+				
+				alert("먼저 로그인 해주세요!");
+				// 로그인 페이지로 이동
+				location.href="[[@{/member/login}]]";
+			} else {
+				// 설문조사 페이지로 이동
+				location.href="[[@{/survey/}]]";
+			}
+			
+		}// onclick
+		
+		// 추천 레시피 출력받는 버튼
+		let get_recomm_btn = document.querySelector(".get_recomm_btn");
+
+        console.log("recomm_btn: " + get_recomm_btn.innerHTML)
+        
+        // let recomm_btn_wrapper = document.getElementById("modal_btn_wrapper");
+		
+        // 모달 전체 내용
+		let my_modal = document.getElementById("myModal");
+        
+        // 추천시스템 모달을 띄우는 버튼
+		let recomm_btn = document.querySelector(".recomm_link1");
+		
+        // welcome 컨트롤러에서 추가한 ladVO 모델
+		let lad_data = "[[${ladVO}]]";
+		
+		console.log("ladVO 존재??" + lad_data);
+        
+		// 추천시스템 모달을 띄우는 버튼을 클릭했을때
+        recomm_btn.onclick = function() {
+        	
+        	// 로그인 하지 않았을때
+			if (userid == "anonymousUser") {
+				
+				// 모달 팝업 방지
+				my_modal.style.display = "none";
+				// recomm_btn_wrapper.innerHTML = ``;
+				alert("로그인이 필요한 서비스입니다!");
+				
+				// 로그인 페이지로 이동(컨트롤러내에 session이 null이면 로그인 페이지로 redirect 시키는 코드가 있음)
+				location.href="[[@{/member/login}]]";
+			}
+        	
+        	// 로그인 상태이고, 로그인한 유저의 lad(선호/비선호 재료)데이터가 존재하지 않을때!(설문조사를 한번도 실시하지 않았을때)
+        	if (userid != "anonymousUser" && lad_data == "") {
+        		let confirm_msg = "선호/비선호 재료 데이터가 존재하지 않습니다! 지금 데이터를 등록하시려면 확인을, 나중에 하시려면 취소를 눌러주세요.";
+        		
+        		// 모달 팝업 방지
+        		my_modal.style.display = "none";
+        		
+        		// confirm창 출력: "확인"누르면 설문조사 페이지로 이동시킴, "취소"누르면 welcome페이지로 이동
+        		if(confirm(confirm_msg)==true) {
+        			
+        			location.href="[[@{/survey/}]]";
+        		} else {
+        			
+        			location.href="[[@{/}]]";
+        		}
+        	}
+        	
+        }// onclick
+		
+        // axios 통신 성공여부 확인용 메세지 인자
+		let request_msg = "request:해줘";
+		
+		console.log("recomm_btn: " + recomm_btn.innerHTML);
+		//console.log("request_msg:" + request_msg);
+		
+		// 추천 레시피 출력받는 버튼을 클릭했을때 실행
+		get_recomm_btn.onclick = function(e) {
+			
+			console.log("request_msg:" + request_msg);
+			
+			// ('/recomm/getRecomm) 컨트롤러 매핑주소로 request_msg 인자를 태워서 axios 전송!'
+			axios.post(`/recomm/getRecomm`, 
+					{
+						request_msg: request_msg
+					}
+			// axios 통신이 성공했을때 처리되는 부분
+			).then(function(response){
+				
+				console.log("전송 성공?" + response.data);
+				alert("성공이다");
+				
+				// RestController에서 리턴한 데이터(추천 레시피 리스트)
+				let recomm = response.data;
+				console.log(recomm[0].recipeTitle);
+				// 모달의 body 부분
+				let result_modal = document.querySelector("#myModal .modal-body #modal_body_content");
+				
+				// 모달 body 부분에 추가할 동적 html 초기화
+				let recomm_result = "";
+				
+				// 기존 내용 다 날려!
+				result_modal.innerHTML = ``;
+				
+				// 추천 레시피 리스트의 크기만큼
+				for (let i = 0; i < recomm.length; i++) {
+					
+					// 동적 html 생성
+					recomm_result = 
+					`<div class="recipe_box">
+                        <span class="box_num"># ${i+1}</span>
+                        <a href="recipe/detailpage?recipeNum=${recomm[i].recipeNum}" title="클릭하여 상세 페이지로 이동하기!"><img src=${recomm[i].recipeImage}></a>
+                        <p>${recomm[i].recipeTitle}</p>
+                        <span class="writer_span">by ${recomm[i].recipeOgWriter}</span> 
+                    </div>`;
+					
+                    // modal body 부분의 html에 동적 html을 for문을 돌때마다 추가(th:each와 비슷한 느낌)
+					result_modal.innerHTML += recomm_result;
+				}
+				
+			// axios 통신이 실패했을때 처리되는 부분	
+			}).catch(function(err) {
+				
+				console.log("R컨트롤러에 도달 실패" + err);
+			});
+			
+			
+			
+			
+		}// onclick
+		
+	}
+
+</script>
+
+</head>
+<body>
+
+<div layout:fragment="content">
+	<div class="content_section">
+		<div class="content_wrapper row">
+			<div class="left col-6">
+				<div class="left_upper">
+					<p class="main_txt1">선호하는 재료를 골라</p>
+					<p class="main_txt2">맛있는 요리를 추천받으세요</p>
+				</div>
+				
+				<div class="left_lower row ms-1">
+					<div class="box1 col-4 ms-5 me-5">
+						<p id="modal_btn_wrapper"><a data-bs-toggle="modal" data-bs-target="#myModal" class="recomm_link1">추천받기</a></p>
+					</div>
+					
+					<div class="box2 col-4 ms-5">
+						<p><a th:href="@{/ranking/}" class="recomm_link2">랭킹보기</a></p>
+					</div>
+				</div>
+			</div>
+			<div class="right col-6">
+				<div class="right_upper">
+					
+				</div>
+				
+				<div class="right_lower">
+					<!-- 메세징 처리를 위해 href 압수! -->
+					<a href="#"><img id="survey_link" th:src="@{/images/syomei_onegai.png}"></a>
+				</div>
+				
+				<div>
+					<a class="btn btn-outline-primary" th:href="@{/testpage}" style="visibility: hidden">TEST</a>
+				</div>
+			</div>
+		</div><!-- //content_wrapper -->
+	</div><!-- //content_section -->
+	
+	<!-- --------------------------------------------------------------------------------------- -->
+	
+	<!-- The Modal -->
+	<div class="modal" id="myModal">
+	  <div class="modal-dialog modal-fullscreen">
+	    <div class="modal-content">
+	
+	      <!-- Modal Header -->
+	      <div class="modal-header">
+	        <h4 class="modal-title">[[${memberNick}]]유저님! 당신을 위한 레시피는!</h4>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+	      </div>
+	
+	      <!-- Modal body -->
+	      <div class="modal-body modal_body">
+	      	<div id="modal_body_content">
+	      		<p class="before_btn_click">"[[${memberNick}]]" 유저님에게 안성맞춤인 추천 레시피들을 보시려면 아래 "추천 받기!" 버튼을 클릭해주세요!</p>	
+	      	</div>
+	      </div>
+	
+	      <!-- Modal footer -->
+	      <div class="modal-footer bg-dark">
+	      	<button type="button" class="btn btn-success get_recomm_btn me-3">추천 받기!</button>
+	        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">나가기</button>
+	      </div>
+	
+	    </div>
+	  </div>
+	</div><!-- //modal -->
+	
+	
+	
+</div><!-- //fragment -->
+
+
+</body>
+</html>

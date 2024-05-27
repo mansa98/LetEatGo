@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>게시글 보기</title>
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script>
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<!-- 댓글 전송용  -->
+<!-- AJAX library axios -->
+<script th:src="@{'/axios/1.5.0/dist/axios.min.js'}"></script>
+
+<!-- 코드 다량 발생 → 별도 파일화 -->
+<script th:src="@{'/js/inq_view.js'}"></script>
+
+<!-- 댓글 제어 -->
+<script>
+
+window.onload = () => {
+
+	// 개별글 로딩시 지금까지 집계된 댓글들 읽어오기
+	let inqNum = '[[${inq.inqNum}]]';
+	let globalMemberNick = "[[${#authentication.principal == 'anonymousUser' ? '비회원' : #authentication.principal.memberNick}]]";
+	
+	// 전체 댓글 로딩(불러오기) : inq_view.js 파일로 함수 분리
+	// getAllReplies(inqNum);
+	// 2024.3 : 댓글 수정 버튼의 댓글 영역 내로 이관된 조치에 따른 후속 조치(수정) : 인자 추가
+	// 0424 : 댓글 아이디가아닌 닉네임이 뜨게 수정(유재승)
+	getAllReplies(inqNum, globalMemberNick);
+	
+	/* ***************************************************************************** */ 
+ 
+	// 댓글 작성 함수 : inq_view.js 파일로 함수 분리
+	// 0424 : 댓글 아이디가아닌 닉네임이 뜨게 수정(유재승)
+	writeReply(inqNum, globalMemberNick);
+	
+	// 댓글 수정 함수 : 2024.3 : 댓글 수정 버튼의 댓글 영역 내로 이관된 조치에 따른 후속 조치(수정)
+	// updateReply(inqNum, '[[${#authentication.name}]]');
+	
+	// 댓글 삭제 함수 : 2024.3 : 댓글 삭제 버튼의 댓글 영역 내로 이관된 조치에 따른 후속 조치(수정)
+	// deleteReplies(inqNum, '[[${#authentication.name}]]');
+	
+	// (원)글 삭제 함수
+	// 0424 : 댓글 아이디가아닌 닉네임이 뜨게 수정(유재승)
+	deleteInq(inqNum, globalMemberNick);
+	
+} // onload
+</script>
+</head>
+
+<body>
+	<div layout:fragment="content" class="main_sect_pnl">
+		<div class="content_sect_pnl">
+			<h2 class="d-flex justify-content-center">문의사항</h2>
+		<div class="layout list_view_update">
+			<div class="mx-auto mt-4 d-flex  justify-content-between" style="width: 970px;">
+				<!-- 뒤로가기 -->
+				<div><a type="button" class="btn" style="background-color:#eee;" th:href="@{/inq/list.do}"><i class="bi bi-arrow-left"></i> 뒤로가기</a></div>
+				<div class="d-flex">
+				<!-- 회원이면 글 수정(본인만) -->
+				<div sec:authorize="hasRole('ROLE_USER')">
+				<a type="button" class="btn" style="background-color:#eee;"
+				th:if="${inq.inqWriter == #authentication.principal.memberNick}"
+				th:href="@{/inq/update.do/{id}(id = ${inq.inqNum})}">글 수정</a>
+				</div>
+				
+				<!-- 회원이면 글 삭제(본인만) -->
+				<div sec:authorize="hasRole('ROLE_USER') and !hasRole('ROLE_ADMIN')">
+				<a type="button" class="btn btn-danger ms-2"
+				th:if="${inq.inqWriter == #authentication.principal.memberNick}"
+				th:id="${'inq_delete_btn_' + inq.inqNum}"href="#">글 삭제</a>
+				</div>
+				<!-- 관리자면 글 삭제(전부다) -->
+				<div sec:authorize="hasRole('ROLE_ADMIN')">
+				<a type="button" class="btn btn-danger ms-2"
+				th:id="${'inq_delete_btn_' + inq.inqNum}"href="#">글 삭제</a>
+				</div>
+				</div>
+			</div>
+	<div>
+		<!-- <a type="button" class="btn btn-info" th:href="@{/inq/list.do}">back</a>
+				&nbsp; -->
+	<table class="table mx-auto mt-4" style="width: 970px;">
+		<tr>
+			<th scope="col">번호</th>
+			<td th:utext="${inq.inqNum}"></td>
+		</tr>
+		
+		<tr>
+			<th scope="col">제목</th>
+			<td th:utext="${inq.inqTitle}"></td>
+		</tr>
+		<tr>	
+			<th scope="col">내용</th>
+			<td>
+				<div id="inqContentDiv" th:utext="${inq.inqContent}" contentdeditable="false"></div>
+			</td>
+		</tr>
+		<tr>
+			<th scope="col">작성자</th>
+			<td th:utext="${inq.inqWriter}"></td>
+		</tr>
+		<tr>
+			<th scope="col">등록일</th>
+			<td th:utext="${#dates.format(inq.inqDate, 'yy.MM.dd HH:mm')}"></td>
+		</tr>
+		<tr>
+		<th scope="col">첨부파일</th>
+			<td>
+				<span th:if="${#strings.isEmpty(inq.inqFile)}">첨부 파일 없음</span>
+				
+				<a th:href="@{'/inq/download/'+${inq.inqOriginalFile}+'/'+${inq.inqFile}}"
+				   th:if="${!#strings.isEmpty(inq.inqOriginalFile)}"		
+				   th:utext="${inq.inqOriginalFile}"></a>
+			</td>
+		</tr>
+	</table>
+	</div>
+<!-- <a th:href="@{${inq.filepath}}">다운받기</a> -->
+<!-- <a th:href="@{/delete(id=${inq.inqNum})}">글삭제</a> -->
+		</div>
+		</div>
+		 <!-- 댓글 영역 -->
+		<div id="reply_pnl" class="mx-auto my-3" style="width:950px;">
+		<!-- 개별 게시글 전체 댓글 리스트 -->
+			<div id="reply_list_pnl" class="bg-light my-3">
+			<!-- 댓글 리스트 -->
+			</div>
+			<!-- 댓글 등록/수정 -->
+			<!-- 0424 : 권한없으면 댓글작성 못하게(유재승) -->
+			<div sec:authorize="hasRole('ROLE_ADMIN')">
+				<div id="reply_write_update_pnl" class="my-3">
+					<textarea id="reply_write_form" name="reply_write_form"
+					class="form-control border border-silver"
+					placeholder="댓글을 100자이내로 작성하십시오."></textarea>
+				</div>
+				<div class="d-flex justify-content-end align-items-center my-2">
+					<!-- 0425등록시 # -> @{'/inq/view.do/'+ ${inq.inqNum}} 새로고침 되도록 변경... -->
+					<a th:href="@{'/inq/view.do/'+ ${inq.inqNum}}" th:id="${'reply_write_btn_' + inq.inqNum}" class="btn btn-sm my-2 me-2" style="background-color:#eee;">댓글 등록</a>
+				</div>
+			</div>
+			<div sec:authorize="hasRole('ROLE_USER') and !hasRole('ROLE_ADMIN')"
+				th:if="${inq.inqWriter == #authentication.principal.memberNick}">
+				<div id="reply_write_update_pnl" class="my-3">
+					<textarea id="reply_write_form" name="reply_write_form"
+					class="form-control border border-silver" 
+					placeholder="댓글을 100자이내로 작성하십시오."></textarea>
+				</div>
+				<div class="d-flex justify-content-end align-items-center my-2">
+				<!-- 0425등록시 # -> @{'/inq/view.do/'+ ${inq.inqNum}} 새로고침 되도록 변경... -->
+					<a th:href="@{'/inq/view.do/'+ ${inq.inqNum}}" th:id="${'reply_write_btn_' + inq.inqNum}" class="btn btn-sm my-2 me-2" style="background-color:#eee;">댓글 등록</a>
+				</div>
+			</div>
+			<!-- 댓글 수정/삭제 -->
+			<!-- <a href="#" th:id="${'reply_update_btn' + inq.inqNum}" class="btn btn-primary my-2">댓글 수정</a>
+			<a href="#" th:id="${'reply_delete_btn' + inq.inqNum}" class="btn btn-primary my-2">댓글 삭제</a> -->
+		</div>
+	</div>
+</body>
+</html>
+<!-- th:href -> a태그에 경로를 걸 때 사용 -->
+<!-- th:text -> 태그에 문자열을 출력할 때 사용 -->
+ <!-- th:href="@{/delete(id=${inq.id})" -->

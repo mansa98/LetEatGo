@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}">
+<head>
+
+<!-- <style>
+
+th.nav-item {
+  border-left:1px solid #DEE2E6;
+}
+
+th.nav-item:hover {
+  color: orange;
+  cursor: pointer;
+}
+
+</style> -->
+
+
+
+<meta charset="UTF-8">
+<title>Ranking</title>
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<link rel="stylesheet" th:href="@{/css/ranking.css}"/>
+
+<!-- AJAX library axios -->
+<script	th:src="@{'/axios/1.5.0/dist/axios.min.js'}"></script>
+
+<script>
+
+	
+	function movePage(prm) {
+	    var pageElement = prm;
+	    location.href="/recipe/detailpage?recipeNum=" + pageElement;
+	}
+	// http://localhost:8181/recipe/detailpage?recipeNum=%20pageElement
+	// http://localhost:8181/ranking/'http://localhost:8181/recipe/detailpage?recipeNum=%20%27%20+%20prm
+	
+	
+	window.onload = function() {
+		
+		let ranked_recipe1 = document.getElementById("ranked_recipe1");
+		let ranked_recipe2 = document.getElementById("ranked_recipe2");
+		let ranked_recipe3 = document.getElementById("ranked_recipe3");
+		let ranked_recipe4 = document.getElementById("ranked_recipe4");
+		let ranked_recipe5 = document.getElementById("ranked_recipe5");
+		
+		/* console.log("확인: " + ranked_recipe1.innerHTML);
+		console.log("확인: " + ranked_recipe2.innerHTML);
+		console.log("확인: " + ranked_recipe3.innerHTML);
+		console.log("확인: " + ranked_recipe4.innerHTML);
+		console.log("확인: " + ranked_recipe5.innerHTML); */
+		
+		
+		
+	
+		
+		
+		/* ranked_recipe1.onclick = function(e) {
+			
+			 http://localhost:8181/ranking/@%7B'/recipe/detailpage?recipeNum=%27%20+%20${recipe.recipeNum}}
+			
+			location.href="@{'/recipe/detailpage?recipeNum=' + ${recipe.recipeNum}}";
+			
+		} */
+		
+		
+		
+		
+		
+		
+		
+	}// onload
+
+</script>
+</head>
+<body>
+
+<div layout:fragment="content" class="content_section_ranking">
+	<div class="menu_name_section"> 
+		랭킹 
+	</div>
+	<div class="content_wrapper_ranking">
+	
+		<div class="row mx-auto">
+			<!-- <p style="font-size:50px; font-weight: bold; font-family: sans-serif;" th:text="${welcome}"></p>
+			test message -->
+			<!-- <div class="left col-12 mb-5">
+				<p class="fs-2 fw-bold">랭킹 차트</p>
+			</div> -->
+			
+				<div > <!-- 1등 부분 시작 -->
+					<div class="fs-5 justify-content-start">
+						<div id="rangking" class="d-flex mx-auto" style="width:51.53vw; height:450px;">
+						<!-- <img id="testimg" th:src="@{/images/별의세기.jpg}" th:src="" th:style=" 'background-image: url(@{/images/별의세기.jpg})'; min-width: 80%; height:auto;">  -->
+							
+							<div class="testimg" th:onclick="|javascript:movePage('${rankedRecipe1.recipeNum}')|" id="ranked_recipe1" th:style="'background-image:url(' + ${rankedRecipe1.recipeImage} + '); background-repeat: no-repeat, repeat; background-size: 100% 100%; display: flex; width: 80vw; height: auto;'"> <!-- recipe_image --> 
+								<div id="testrank-1" class="me-auto">1</div>
+								<div class="testwriter" style="width:20vw; height:450px; margin-right:0px;">
+									<div class="fs-2 ms-3" th:text="${rankedRecipe1.recipeTitle}"></div><!-- th:text="${recipeTitle}" -->
+									<div id="recipe_cocu" style="font-size:15px; text-align:end" th:text="'작성자:' + ${rankedRecipe1.recipeOgWriter}"></div><!-- th:text="${recipeWriter}" -->
+									<div id="recipe_cocu_bo" th:text="'조회수: ' + ${rankedRecipe1.recipeCount}"></div><!-- th:text="${recipeCount}" -->
+									<div id="recipe_cocu_bo" th:text="'좋아요: ' + ${rankedRecipe1.recipeLike}"></div><!-- th:text="${recipeLike}" -->
+								</div>
+							</div>
+						</div><!-- recipe_image -->
+					</div>
+				</div> <!-- // 1등 부분 끝 -->
+			
+			<div class="two_to_five d-flex flex-row flex-wrap mx-auto mb-5" style="width:55vw"> <!-- 2등 부터 5등까지 시작 --> 
+			
+				<div class="fs-5 row mx-auto mt-5" style="width:26.4vw;"> <!-- 2등 -->
+					
+					<div id="rangking" class="d-flex row" style="width:27vw; height:250px;">
+					<!-- <img id="testimg" th:src="@{/images/별의세기.jpg}" th:src="" th:style=" 'background-image: url(@{/images/별의세기.jpg})'; min-width: 80%; height:auto;">  -->
+						<!-- 이미지 -->
+						<div class="testimg" th:onclick="|javascript:movePage('${rankedRecipe2.recipeNum}')|" id="ranked_recipe2" th:style="'background-image:url(' + ${rankedRecipe2.recipeImage} + '); width: 30vw; height:auto; background-repeat: no-repeat, repeat; background-size: cover;'">
+							<div id="testrank-2">2</div>
+							<div class="testwriter" style="width:8vw; height:250px; margin-right:0px; font-size:12px;">
+								<div th:text="${rankedRecipe2.recipeTitle}"></div><!-- th:text="${recipeTitle}" -->
+								<div id="recipe_cocu" th:text="'작성자:' + ${rankedRecipe2.recipeOgWriter}"></div><!-- th:text="${recipeWriter}" -->
+								<div id="recipe_cocu_bo" th:text="'조회수: ' + ${rankedRecipe2.recipeCount}"></div><!-- th:text="${recipeCount}" -->
+								<div id="recipe_cocu_bo" th:text="'좋아요: ' + ${rankedRecipe2.recipeLike}"></div><!-- th:text="${recipeLike}" -->
+							</div>
+							
+						</div>
+						<!-- // 이미지 -->
+					</div><!-- recipe_image -->
+				</div> <!-- // 2등 -->
+				
+				<div class="fs-5 row mx-auto mt-5" style="width:26.4vw;"> <!-- 2등 -->
+					
+					<div id="rangking" class="d-flex row" style="width:27vw; height:250px;">
+					<!-- <img id="testimg" th:src="@{/images/별의세기.jpg}" th:src="" th:style=" 'background-image: url(@{/images/별의세기.jpg})'; min-width: 80%; height:auto;">  -->
+						<!-- 이미지 -->
+						<div class="testimg" th:onclick="|javascript:movePage('${rankedRecipe3.recipeNum}')|" id="ranked_recipe3" th:style="'background-image:url(' + ${rankedRecipe3.recipeImage} + '); width: 30vw; height:auto; background-repeat: no-repeat, repeat; background-size: cover;'">
+							<div id="testrank-2">3</div>
+							<div class="testwriter" style="width:8vw; height:250px; margin-right:0px; font-size:12px;">
+								<div th:text="${rankedRecipe3.recipeTitle}"></div><!-- th:text="${recipeTitle}" -->
+								<div id="recipe_cocu" th:text="'작성자:' + ${rankedRecipe3.recipeOgWriter}"></div><!-- th:text="${recipeWriter}" -->
+								<div id="recipe_cocu_bo" th:text="'조회수: ' + ${rankedRecipe3.recipeCount}"></div><!-- th:text="${recipeCount}" -->
+								<div id="recipe_cocu_bo" th:text="'좋아요: ' + ${rankedRecipe3.recipeLike}"></div><!-- th:text="${recipeLike}" -->
+							</div>
+							
+						</div>
+						<!-- // 이미지 -->
+					</div><!-- recipe_image -->
+					
+				</div> <!-- // 2등 -->
+	
+				
+				<div class="fs-5 row mx-auto mt-5" style="width:26.4vw;"> <!-- 4등 -->
+					
+					<div id="rangking" class="d-flex row" style="width:27vw; height:250px;">
+					<!-- <img id="testimg" th:src="@{/images/별의세기.jpg}" th:src="" th:style=" 'background-image: url(@{/images/별의세기.jpg})'; min-width: 80%; height:auto;">  -->
+						<!-- 이미지 -->
+						<div class="testimg" th:onclick="|javascript:movePage('${rankedRecipe4.recipeNum}')|" id="ranked_recipe4" th:style="'background-image:url(' + ${rankedRecipe4.recipeImage} + '); width: 30vw; height:auto; background-repeat: no-repeat, repeat; background-size: cover;'">
+							<div id="testrank-2">4</div>
+							<div class="testwriter" style="width:8vw; height:250px; margin-right:0px; font-size:12px;">
+								<div th:text="${rankedRecipe4.recipeTitle}"></div><!-- th:text="${recipeTitle}" -->
+								<div id="recipe_cocu" th:text="'작성자:' + ${rankedRecipe4.recipeOgWriter}"></div><!-- th:text="${recipeWriter}" -->
+								<div id="recipe_cocu_bo" th:text="'조회수: ' + ${rankedRecipe4.recipeCount}"></div><!-- th:text="${recipeCount}" -->
+								<div id="recipe_cocu_bo" th:text="'좋아요: ' + ${rankedRecipe4.recipeLike}"></div><!-- th:text="${recipeLike}" -->
+							</div>	
+							
+						</div>
+						<!-- // 이미지 -->
+					</div><!-- recipe_image -->
+					
+				</div> <!-- // 4등 -->
+	
+				
+				<div class="fs-5 row mx-auto mt-5" style="width:26.4vw;"> <!-- 5등 -->
+					
+					<div id="rangking" class="d-flex row" style="width:27vw; height:250px;">
+					<!-- <img id="testimg" th:src="@{/images/별의세기.jpg}" th:src="" th:style=" 'background-image: url(@{/images/별의세기.jpg})'; min-width: 80%; height:auto;">  -->
+						<!-- 이미지 -->
+						<div class="testimg" th:onclick="|javascript:movePage('${rankedRecipe5.recipeNum}')|" id="ranked_recipe5" th:style="'background-image:url(' + ${rankedRecipe5.recipeImage} + '); width: 30vw; height:auto; background-repeat: no-repeat, repeat; background-size: cover;'">
+							<div id="testrank-2">5</div>
+							<div class="testwriter" style="width:8vw; height:250px; margin-right:0px; font-size:12px;">
+								<div th:text="${rankedRecipe5.recipeTitle}"></div><!-- th:text="${recipeTitle}" -->
+								<div id="recipe_cocu" th:text="'작성자:' + ${rankedRecipe5.recipeOgWriter}"></div><!-- th:text="${recipeWriter}" -->
+								<div id="recipe_cocu_bo" th:text="'조회수: ' + ${rankedRecipe5.recipeCount}"></div><!-- th:text="${recipeCount}" -->
+								<div id="recipe_cocu_bo" th:text="'좋아요: ' + ${rankedRecipe5.recipeLike}"></div><!-- th:text="${recipeLike}" -->
+							</div>
+							
+						</div>
+						<!-- // 이미지 -->
+					</div><!-- recipe_image -->
+					
+				</div> <!-- // 5등 -->
+				
+			</div> <!-- 2등 부터 5등까지 끝 -->
+			
+		</div> 
+		
+		
+					
+	</div><!-- //content_wrapper_ranking -->
+	
+</div><!-- //fragment -->>
+
+
+</body>
+</html>

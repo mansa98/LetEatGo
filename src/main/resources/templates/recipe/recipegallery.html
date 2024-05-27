@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>Let Eat Go ♬: Recipe Gallery</title>
+
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet"
+	th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+<!-- 외장 css -->	
+<link rel="stylesheet" th:href="@{/css/recipegallery_css.css}">
+<style>
+
+
+</style>
+</head>
+<body>
+		<!-- content_section -->
+		<div layout:fragment="content" class="content_section">
+			<!-- content_section_gallery -->
+			<div class="content_section_gallery">
+				<div class="menu_name_section">
+					<h2>레시피</h2>
+				</div>
+				<div th:if="${searchWord} != null" class="sub_menu_section">
+					<strong>"[[${searchWord}]]"</strong> 으로 검색하신 결과입니다.
+				</div>
+				<!-- content_wrapper_gallery -->
+				<div class="content_wrapper_gallery">
+					<!-- gallery_wrapper -->
+					<div class="gallery_wrapper">
+						<!-- gallery_row -->
+						<ul class="gallery_row">
+							<li class="t1" th:each="recipe : ${recipeList}">
+								<a th:href="@{'/recipe/detailpage?recipeNum=' + ${recipe.recipeNum}}"><img height="270px" width="282px" th:src="${recipe.recipeImage}"></a>
+								<span th:text="${recipe.recipeTitle}"></span>
+								<span style="color: silver;" th:text="'by '+ ${recipe.recipeOgWriter}"></span>
+								<!-- <span th:utext="${recipe.recipeCookery}"></span> -->
+								<!-- <span th:utext="${recipe.recipeCookeryImages}"></span> -->
+							<!-- </li>
+							<li class="t2 col-2 bg-secondary mx-5">
+							</li>
+							<li class="t3 col-2 bg-warning mx-5">
+							</li>
+							<li class="t4 col-2 bg-dark mx-5">
+							</li> -->
+						
+						</ul>
+						<!-- // gallery_row -->
+					<!-- 검색이 아닌 경우(페이징) -->
+					<div class="d-flex justify-content-center mt-4 mb-5" th:if="${#strings.isEmpty(searchKey)}">
+						<!-- <table class="table table-striped" th:if="${pageVO != null}">
+
+							<tr>
+							
+								<th style="width: 150px;">총 게시글 수</th>
+								
+								<td th:text="${pageVO.listCount}"></td>
+								
+								<th style="width: 150px;">현재 페이지</th>
+								
+								<td th:text="${pageVO.currPage}"></td>
+								
+								<th style="width: 150px;">다음 페이지</th>
+								
+								<td th:text="${pageVO.nextPage}"></td>
+								
+								<th style="width: 150px;">시작 페이지</th>
+								
+								<td th:text="${pageVO.startPage}"></td>
+								
+								<th style="width: 150px;">마지막 페이지</th>
+								
+								<td th:text="${pageVO.endPage}"></td>
+								
+								<th style="width: 150px;">총 페이지 수</th>
+								
+								<td th:text="${pageVO.maxPage}"></td>
+								
+								<th style="width: 150px;"></th>
+								
+								<td th:text="${pageVO.getCurrPage}"></td>
+							
+							</tr>
+							
+						</table> -->
+						
+						<nav aria-label="Page navigation example">
+				  			<ul class="pagination justify-content-center">
+				    			<!-- <li class="page-item"><a class="page-link" href="${pageVO.currPage}">1</a></li> -->
+				    			<!-- 첫페이지 -->
+				    			<li class="page-item"><a class="page-link" th:href="@{'/recipe/gallerylist.do?currPage=1'}">
+				    				<!-- <i class="bi bi-arrow-bar-left"></i> -->
+				    				<i class="bi bi-chevron-double-left"></i>	
+				    			</a></li>
+				    			
+				    			<!-- 이전 페이지 -->
+							    <li th:unless="${pageVO.currPage == 1}"class="page-item">
+							      <a class="page-link" th:href="@{'/recipe/gallerylist.do?currPage='+${pageVO.prePage}}" aria-label="Previous" aria-hidden="true"><i class="bi bi-chevron-left"></i><!-- &raquo; --></a>
+							    </li>
+							    <!-- 이전 페이지(현재 페이지가 1일때: 이전 버튼을 비활성화) -->
+							    <li th:if="${pageVO.currPage == 1}"class="page-item">
+							      <a class="page-link" aria-label="Previous" aria-hidden="true"><i class="bi bi-chevron-left"></i><!-- &raquo; --></a>
+							    </li>
+							    
+							    <!-- // 현재 페이지에 보여줄 마지막 페이지 수(10, 20, 30, ...)
+								int endPage = startPage + 10; -->
+							    
+				    			<!-- 본페이지 3페이지씩 출력 -->
+				    			<!-- 페이지가 1개 초과 10이하 일때 분량이 될때 --> 
+				    			<li th:if="${1 < pageVO.maxPage}"
+				    				th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"  
+				    				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+				    				<a class="page-link" th:href="@{'/recipe/gallerylist.do?currPage='+${num}}">[[${num}]]</a>
+				    			</li>
+				    			
+				    			<!-- 이건 없어도 될듯 첫화면이 3페이지 분량이 안될때 -->
+				    			<!-- <li th:if="${pageVO.maxPage <= 2}"
+				    				th:each="num : ${#numbers.sequence(pageVO.prePage,pageVO.maxPage)}"  
+				    				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+				    				<a class="page-link" th:href="@{'/board/list.do?currPage='+${num}}">[[${listCount}]]</a>
+				    			</li> -->
+				    			
+				    			<!-- 한페이지 분량일때 --> <!-- 생략가능 -->
+				    			<li th:if="${pageVO.maxPage == 1}"
+				    				th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"  
+				    				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+				    				<a class="page-link" th:href="@{'/recipe/gallerylist.do?currPage='+${num}}">[[${num}]]</a>
+				    			</li>
+				    			
+				    			<!-- 게시글이 없을때 -->
+				    			<li th:if="${pageVO.maxPage == 0}"
+				    				th:each="num : ${#numbers.sequence(pageVO.maxPage,pageVO.maxPage)}"  
+				    				th:class="${pageVO.currPage == num ? 'page-item':'page-item'}">
+				    				<a class="page-link" href="#">[[${num}]]</a>
+				    			</li>
+				    			
+				    			
+						    	<!-- 다음 페이지 -->
+							    <li class="page-item" th:if="${pageVO.currPage != pageVO.maxPage}">
+							      <a class="page-link" th:href="@{'/recipe/gallerylist.do?currPage='+${pageVO.nextPage}}" aria-label="Next" aria-hidden="true"><i class="bi bi-chevron-right"></i><!-- &raquo; --></a>
+							    </li>
+							    <!-- 다음 페이지(현재 페이지가 maxPage일때: 다음 버튼을 비활성화) -->
+							    <li class="page-item" th:if="${pageVO.currPage == pageVO.maxPage}">
+							      <a class="page-link" aria-label="Next" aria-hidden="true"><i class="bi bi-chevron-right"></i><!-- &raquo; --></a>
+							    </li>
+							    
+							    <!-- 다음페이지가 없을 경우 ex)게시글 없을 경우 -->
+							    <li class="page-item" th:if="${pageVO.maxPage == 0}">
+							      <a class="page-link" href="#" aria-label="Next" aria-hidden="true"><!-- &raquo; --></a>
+							    </li>
+							    
+							    <!-- 마지막 페이지 -->
+							    <li class="page-item" th:if="${pageVO.maxPage != 0}">
+							    <a class="page-link" th:href="@{'/recipe/gallerylist.do?currPage='+${pageVO.maxPage}}">
+							    	<!-- <i class="bi bi-arrow-bar-right"></i> -->
+							    	<i class="bi bi-chevron-double-right"></i>
+							    </a></li>
+							    <!-- 마지막 페이지가 없을 경우 ex) 게시글 없을 경우 -->
+							    <li class="page-item" th:if="${pageVO.maxPage == 0}">
+							    <a class="page-link" href="#">
+							    	<i class="bi bi-arrow-bar-right"></i>
+							    </a></li>
+				  			</ul>
+						</nav>
+						
+					</div>
+					<!-- // 검색이 아닌 경우(페이징) -->
+					
+					
+					<!-- 검색인 경우(페이징) -->
+					<div class="d-flex justify-content-center mt-4 mb-5" th:if="${not #strings.isEmpty(searchKey)}">
+						<!-- <table class="table table-striped" th:if="${pageVO != null}">
+
+							<tr>
+							
+								<th style="width: 150px;">총 게시글 수</th>
+								
+								<td th:text="${pageVO.listCount}"></td>
+								
+								<th style="width: 150px;">현재 페이지</th>
+								
+								<td th:text="${pageVO.currPage}"></td>
+								
+								<th style="width: 150px;">다음 페이지</th>
+								
+								<td th:text="${pageVO.nextPage}"></td>
+								
+								<th style="width: 150px;">시작 페이지</th>
+								
+								<td th:text="${pageVO.startPage}"></td>
+								
+								<th style="width: 150px;">마지막 페이지</th>
+								
+								<td th:text="${pageVO.endPage}"></td>
+								
+								<th style="width: 150px;">총 페이지 수</th>
+								
+								<td th:text="${pageVO.maxPage}"></td>
+								
+								<th style="width: 150px;"></th>
+								
+								<td th:text="${pageVO.getCurrPage}"></td>
+							
+							</tr>
+							
+						</table> -->
+						
+						<nav aria-label="Page navigation example">
+				  			<ul class="pagination justify-content-center">
+				    			<!-- <li class="page-item"><a class="page-link" href="${pageVO.currPage}">1</a></li> -->
+				    			<!-- 첫페이지 -->
+				    			<li class="page-item"><a class="page-link" th:href="@{'/recipe/searchList.do?currPage=1&searchKey='+${searchKey}+'&searchWord='+${searchWord}}">
+				    															   <!-- "@{'/board/searchList.do?currPage=1&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" -->
+				    				<!-- <i class="bi bi-arrow-bar-left"></i> -->
+				    				<i class="bi bi-chevron-double-left"></i>	
+				    			</a></li>
+				    			
+				    			<!-- 이전 페이지 -->
+							    <li th:unless="${pageVO.currPage == 1}"class="page-item">
+							      <a class="page-link" th:href="@{'/recipe/searchList.do?currPage='+${pageVO.prePage}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="Previous" aria-hidden="true"><i class="bi bi-chevron-left"></i><!-- &raquo; --></a>
+							    </li>
+							    <!-- 이전 페이지(현재페이지가 1일때: 이전 버튼을 비활성화) -->
+							    <li th:if="${pageVO.currPage == 1}"class="page-item">
+							      <a class="page-link" aria-label="Previous" aria-hidden="true"><i class="bi bi-chevron-left"></i><!-- &raquo; --></a>
+							    </li>
+							    
+							    <!-- // 현재 페이지에 보여줄 마지막 페이지 수(10, 20, 30, ...)
+								int endPage = startPage + 10; -->
+							    
+				    			<!-- 본페이지 3페이지씩 출력 -->
+				    			<!-- 페이지가 1개 초과 10이하 일때 분량이 될때 --> 
+				    			<li th:if="${1 < pageVO.maxPage}"
+				    				th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"  
+				    				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+				    				<a class="page-link" th:href="@{'/recipe/searchList.do?currPage='+${num}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}">[[${num}]]</a>
+				    			</li>
+				    			
+				    			<!-- 이건 없어도 될듯 첫화면이 3페이지 분량이 안될때 -->
+				    			<!-- <li th:if="${pageVO.maxPage <= 2}"
+				    				th:each="num : ${#numbers.sequence(pageVO.prePage,pageVO.maxPage)}"  
+				    				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+				    				<a class="page-link" th:href="@{'/board/list.do?currPage='+${num}}">[[${listCount}]]</a>
+				    			</li> -->
+				    			
+				    			<!-- 한페이지 분량일때 --> <!-- 생략가능 -->
+				    			<li th:if="${pageVO.maxPage == 1}"
+				    				th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"  
+				    				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+				    				<a class="page-link" th:href="@{'/recipe/searchList.do?currPage='+${num}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}">[[${num}]]</a>
+				    			</li>
+				    			
+				    			<!-- 게시글이 없을때 -->
+				    			<li th:if="${pageVO.maxPage == 0}"
+				    				th:each="num : ${#numbers.sequence(pageVO.maxPage,pageVO.maxPage)}"  
+				    				th:class="${pageVO.currPage == num ? 'page-item':'page-item'}">
+				    				<a class="page-link" href="#">[[${num}]]</a>
+				    			</li>
+				    			
+				    			
+						    	<!-- 다음 페이지 -->
+							    <li class="page-item" th:if="${pageVO.currPage != pageVO.maxPage}">
+							      <a class="page-link" th:href="@{'/recipe/searchList.do?currPage='+${pageVO.nextPage}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="Next" aria-hidden="true"><i class="bi bi-chevron-right"></i><!-- &raquo; --></a>
+							    </li>
+							    <!-- 다음 페이지(현재 페이지가 maxPage랑 동일할때: 링크 비활성화) -->
+							    <li class="page-item" th:if="${pageVO.currPage == pageVO.maxPage}">
+							      <a class="page-link" aria-label="Next" aria-hidden="true"><i class="bi bi-chevron-right"></i><!-- &raquo; --></a>
+							    </li>
+							    
+							    
+							    <!-- 다음페이지가 없을 경우 ex)게시글 없을 경우 -->
+							    <li class="page-item" th:if="${pageVO.maxPage == 0}">
+							      <a class="page-link" href="#" aria-label="Next" aria-hidden="true">다음<!-- &raquo; --></a>
+							    </li>
+							    
+							    <!-- 마지막 페이지 -->
+							    <li class="page-item" th:if="${pageVO.maxPage != 0}">
+							    <a class="page-link" th:href="@{'/recipe/searchList.do?currPage='+${pageVO.maxPage}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}">
+							    	<!-- <i class="bi bi-arrow-bar-right"></i> -->
+							    	<i class="bi bi-chevron-double-right"></i>
+							    </a></li>
+							    <!-- 마지막 페이지가 없을 경우 ex) 게시글 없을 경우 -->
+							    <li class="page-item" th:if="${pageVO.maxPage == 0}">
+							    <a class="page-link" href="#">
+							    	<i class="bi bi-arrow-bar-right"></i>
+							    </a></li>
+				  			</ul>
+						</nav>
+						
+					</div>
+					<!-- // 검색이 아닌 경우(페이징) -->	
+					
+					
+					
+					
+					
+						
+					</div>
+					<!-- // gallery_wrapper -->
+				</div>
+				<!-- // content_wrapper_gallery -->
+			</div>
+			<!-- // content_section_gallery -->				
+		</div>
+		<!-- // content_section -->
+</body>
+</html>

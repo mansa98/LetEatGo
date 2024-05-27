@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<script th:inline="javascript">
+	var message = [[${message}]];
+	
+		alert(message);
+		location.replace([[${url}]]);
+	
+	
+	// location.replace([[${url}]]);
+</script>
+<body>
+
+</body>
+</html>

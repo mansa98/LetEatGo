@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<!-- <script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script> -->
+
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+</head>
+<body>
+
+<div layout:fragment="content">
+	<div class="content_section">
+		<div class="content_wrapper">
+			<div class="row">
+				<!-- <p style="font-size:50px; font-weight: bold; font-family: sans-serif;" th:text="${welcome}"></p>
+				test message -->
+				<div class="left col-12 mb-5">
+					<h2>마이페이지</h2>
+				</div>
+				<div >
+					<table class="table mx-2 mx-auto mt-2" style="width: 95vw;">
+						<thead>
+							<tr class="left fs-3 row justify-content-start">
+								<th class="col-2 row">내정보</th>
+								<!-- <th class="col-2" th:onclick="location.href='@{/update.do}'">내정보수정</th> -->
+								<th class="col-2" th:onclick="|location.href='@{update.do}'|">내정보수정</th>
+								<th class="col-2" th:onclick="|location.href='@{/survey/}'|">선호 / 비선호</th>
+								<th class="col-2">회원관리(관리자)</th>
+								<th class="col-4"> </th>
+							</tr>
+						</thead>
+					</table>
+				</div>
+				
+				<div class="mt-4 row justify-content-start">
+						<i class="bi bi-person-circle" style="font-size:3rem;"></i><h3>이름</h3>
+					<div>
+						<h4>날짜</h4>
+					</div>
+				</div>
+				
+				<p class="fs-2 mt-5">즐겨찾는 요리</p>
+				
+				<div class="row justify-content-start p-auto" >
+					<p class="col-3">홀리몰리</p>
+					<p class="col-3">홀리몰리</p>
+					<p class="col-3">홀리몰리</p>
+					<p class="col-3">홀리몰리</p>
+				</div>
+				<!-- 인자확인용 임시 -->
+				<div>인자현황: [[${user}]] </div>
+				
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+
+</body>
+</html>

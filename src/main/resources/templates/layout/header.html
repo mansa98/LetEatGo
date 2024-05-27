@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko-kr" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<!-- bootstrap webjars -->
+<link rel="stylesheet"
+	th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script>
+
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet"
+	th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+<style>
+
+</style>
+</head>
+<body>
+
+	<div th:fragment="header">
+	
+		<!-- collapse(인자 출력 부분) -->
+		<div id="args_board" class="collapse">
+
+			<div>
+				<table class="table table-striped">
+					<tr>
+						<th style="width: 120px">회원정보(인자)</th>
+						<td th:if="${memberDTO != null}" th:text="${memberDTO}"></td>
+					</tr>
+				</table>
+
+				<!-- 인증정보/회원정보 인자 확인  -->
+				<div th:if="${#authentication != null}">
+
+					<table class="table table-striped">
+						<tr>
+							<th style="width: 120px">인증정보</th>
+							<td>[[${#authentication}]]</td>
+						</tr>
+					</table>
+
+				</div>
+
+			</div>
+		</div><!-- //collapse(인자 출력 부분) -->
+		
+		<!-- 메인 메뉴 -->
+		<nav class="main_menu_wrap navbar navbar-expand-sm navbar-light">
+			<div class="main_menu container-fluid row">
+				<!-- 로고 + 메뉴들 -->
+				<ul class="main_menu_items navbar-nav col-7 row ms-5">
+					<!-- 인자 확인 버튼 -->
+					<!-- <li class="nav-item col-2 ps-5 mb-4 pb-2">
+						<div class="d-flex mt-2">
+							<a href="#args_board" class="btn btn-primary p-2 mt-4 mx-4"
+								data-bs-toggle="collapse" data-bs-target="#args_board"
+								aria-expanded="false" aria-controls="#args_board"> 인자 </a>
+						</div>
+					</li> -->
+					<!-- // 인자 확인 버튼 -->
+					<li class="nav-item col-2">
+						<a th:href="@{'/'}"><img th:src="@{/images/blue.png}" width="150" height="32" /></a>
+					</li>
+					<li class="nav-item col-2"><a class="nav-link" th:href="@{/recipe/gallerylist.do}">레시피</a>
+					</li>
+					<li class="nav-item col-2"><a class="nav-link" th:href="@{/board/list.do}">커뮤니티</a>
+					</li>
+					<li class="nav-item col-2"><a class="nav-link" id="mypage"
+						th:href="@{/mypage}">마이페이지</a></li>
+					<li class="nav-item col-2 dropdown" ><a class="nav-link dropbtn" th:href="@{/ntc/list.do}">고객센터</a>
+						<div class="dropdown-content">
+						        <a th:href="@{/ntc/list.do}">공지사항</a>
+						        <a th:href="@{/inq/list.do}">문의사항</a>
+					    </div>
+					</li>
+				</ul><!-- //로고 + 메뉴들 -->
+				
+				<!-- 검색 -->
+				<form class="d-flex col-3" th:action="@{/recipe/searchList.do}" method="get">
+					<div id="select_pnl" class="pe-2">
+						<select style="width:150px; font-family:Pretendard-regular;" class="form-select" id="searchKey" name="searchKey" aria-label="검색 구분">
+						  <option selected value="recipe_title">레시피이름</option>
+						  <option value="recipe_og_writer">레시피작성자</option>
+						</select>
+					</div>
+					<input class="form-control" type="text" style="font-family: Pretendard-Regular;" id="searchWord" name="searchWord" />
+					<button class="btn btn-info" type="submit">
+						<i class="bi bi-search"></i>
+					</button>
+				</form><!-- // 검색 -->
+				
+				<ul class="login_btns navbar-nav col-2 ms-2 p-3">
+					<li sec:authorize="isAnonymous()"><a class="nav-link" th:href="@{'/member/login'}">로그인</a></li>
+					<li sec:authorize="isAnonymous()"><a class="nav-link" href="#">|</a></li>
+					<li sec:authorize="isAnonymous()"><a class="nav-link" th:href="@{'/member/join'}">회원가입</a></li>
+					<li sec:authorize="isAuthenticated()"><a class="nav-link">
+						<span sec:authorize="isAuthenticated()" th:text="${#authentication.principal.memberNick}"></span>
+						<span sec:authorize="hasRole('ROLE_USER') and !hasRole('ROLE_ADMIN')">회원님</span>
+						<span sec:authorize="hasRole('ROLE_USER') and hasRole('ROLE_ADMIN')">관리자님</span></a>
+					</li>
+					<li sec:authorize="isAuthenticated()"><a class="nav-link">|</a></li>
+					<li sec:authorize="isAuthenticated()"><a class="nav-link" th:href="@{'/logout'}">로그아웃</a></li>
+				</ul>
+			</div>
+		</nav><!-- //메인메뉴 -->
+		<hr>
+
+
+
+	</div><!-- //fragment: header -->
+
+</body>
+</html>

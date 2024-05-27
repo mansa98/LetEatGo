@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+#find_box 
+{  
+    width:450px;
+    height:345px;
+    text-align:center;
+    padding-top:30px;
+    margin:auto;
+    border: 2px solid #A0A0A0;
+    border-radius:3px;
+    font-family:Nanum Gothic;
+    
+}  
+
+div#logo{
+	height:70px;
+	display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+img#mainlogo
+{
+	margin-top:30px;
+}
+input#memberEmail 
+{
+    width:400px;
+    height:50px;
+    margin-top:50px;
+    font-size:15pt;
+    border:3px solid #1E90FF;		
+    text-indent:1em;
+    color:#000;
+    border-bottom:2px solid #1E90FF;
+    border-radius:5px
+}
+
+input#memberName
+{
+	width:400px;
+    height:50px;
+    font-size:15pt;
+    border:3px solid #1E90FF;		
+    text-indent:1em;
+    color:#000;
+    border-top:2px solid #1E90ff;
+	border-radius:5px
+}
+input#findId_btn 
+{
+    width:410px;
+    height:60px;
+    background-color:#1E90FF;
+    border: 2px solid #00BFFF;
+    font-size:15pt;
+    letter-spacing:0.1em;			
+    color:#fff;
+    font-weight: bold;
+
+    padding-bottom:7px;
+    border-radius:5px;
+    margin:2px 0;
+    margin-top:30px;
+    cursor: pointer;
+}
+input::placeholder {
+    color:#1E90FF; 
+    opacity:0.7;
+}
+
+</style>
+</head>
+<body>
+
+
+<div id="find_box">
+	<div id="logo">
+		<a><img id="mainlogo" th:src="@{/images/blue.png}" width="150" height="32" /></a>
+		</div>
+			<form id="findId_frm"
+			 method="post" th:action="@{'/member/find.do'}">
+
+				<!-- 2. 아이디 필드 섹션 시작 -->
+				<div id="id_box">
+
+					<!-- 
+		               2. 아이디 필드 작성 조건
+		           
+		               1) 타입 : 텍스트
+		               2) id : memberEmail
+		               3) name : memberEmail
+		               4) 크기 : 30
+		               5) 최대 입력 글자수 : 20
+		               6) 내부 라벨(초기값) : 이름
+		           -->
+
+				<input type="text" id="memberEmail" name="memberEmail" 
+						size="30" maxlength="20" placeholder="이메일" autocomplete="off">
+
+					
+
+				</div>
+				<!-- 2. 아이디 필드 섹션 끝 -->
+
+				<!-- 3. 생년월일 필드 섹션 시작 -->
+				<div id="pw_box">
+	
+				<!-- 
+	               3. 패쓰워드 필드 작성 조건
+	           
+	               1) 타입 : 텍스트
+	               2) id : memberName
+	               3) name : memberName
+	               4) 크기 : 30
+	               5) 최대 입력 글자수 : 20
+	               6) 내부 라벨(초기값) : 이름
+	           -->
+				
+				<input type="text" id="memberName" name="memberName" 
+						size="30" maxlength="20" placeholder="이름" autocomplete="off">		
+
+					
+
+				</div>
+				<!-- 3. 패쓰워드 필드 섹션 끝 -->
+
+				<!-- 4. 전송 버튼 필드 섹션 시작 -->
+				<div id="submit_box">
+
+					<!-- 
+		               4. 전송 버튼
+		
+		               1) 타입 : 전송
+		               2) id : submit_btn
+		               3) 내부 라벨 : 로그인
+		           -->
+					<input type="submit" id="findId_btn" value="아이디 찾기">
+				</div>
+				<!-- 4. 전송 버튼 필드 섹션 끝 -->
+
+			</form>
+	</div>
+</body>
+</html>

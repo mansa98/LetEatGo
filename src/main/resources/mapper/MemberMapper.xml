@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mbc.leteatgo.mapper.MemberMapper">
+
+<!-- 회원 정보 -->
+	<insert id="insertMemberITF" parameterType="com.mbc.leteatgo.domain.MemberDTO">
+		INSERT INTO member_tbl
+		 VALUES (
+		member_tbl_seq.nextval,
+		#{memberId},
+		#{memberPw},
+		#{memberName},
+		#{memberNick},
+		#{memberGender},
+		#{memberBirthday},
+		#{memberEmail},
+		#{memberMobile},
+		#{memberZip,jdbcType=CHAR},
+		#{memberRoadAddress,jdbcType=NVARCHAR},
+		#{memberJibunAddress,jdbcType=NVARCHAR},
+		#{memberDetailAddress,jdbcType=NVARCHAR},
+		sysdate,
+		1
+		)
+	</insert>
+	
+	<!-- 회원 정보 조회 -->
+	<select id="loginMemberITF" parameterType="String"
+		    resultType="com.mbc.leteatgo.domain.MemberDTO">
+		SELECT
+		member_num as "memberNum",
+		member_id as "memberId",
+		member_pw as "memberPw",
+		member_name as "memberName",
+		member_nick as "memberNick",	
+		member_gender as "memberGender",
+		member_birthday as "memberBirthday",
+		member_email as "memberEmail",
+		member_mobile as "memberMobile",
+		member_zip as "memberZip",
+		member_road_address as "memberRoadAddress",
+		member_jibun_address as "memberJibunAddress",
+		member_detail_address as "memberDetailAddress",
+		member_join_date as "memberJoinDate",		
+		member_enabled as "memberEnabled"
+		FROM member_tbl WHERE member_id = #{memberId}
+	</select>
+	
+	<!-- 아이디 찾기 -->
+	<select id="findMemberITF" parameterType="String"
+		    resultType="com.mbc.leteatgo.domain.MemberDTO">
+		SELECT
+		member_num as "memberNum",
+		member_id as "memberId",
+		member_pw as "memberPw",
+		member_name as "memberName",
+		member_nick as "memberNick",	
+		member_gender as "memberGender",
+		member_birthday as "memberBirthday",
+		member_email as "memberEmail",
+		member_mobile as "memberMobile",
+		member_zip as "memberZip",
+		member_road_address as "memberRoadAddress",
+		member_jibun_address as "memberJibunAddress",
+		member_detail_address as "memberDetailAddress",
+		member_join_date as "memberJoinDate",		
+		member_enabled as "memberEnabled"
+		FROM member_tbl WHERE member_email = #{memberEmail}
+	</select>
+	
+	<!-- 아이디 중복 체크 -->
+	<select id="idCheck" parameterType="String" resultType="int">
+		SELECT COUNT(*)
+		FROM member_tbl
+		WHERE member_id = #{memberId}
+	</select>
+	
+	<!-- 닉네임 중복 체크 -->
+	<select id="nickCheck" parameterType="String" resultType="int">
+		SELECT COUNT(*)
+		FROM member_tbl
+		WHERE member_nick = #{memberNick}
+	</select>
+
+	<!-- 회원 정보 롤(role) 생성 -->
+	<insert id="insertRoleITF" parameterType="com.mbc.leteatgo.domain.Role">
+		INSERT INTO member_role_tbl VALUES (
+		member_roles_seq.nextval,
+		#{memberId},
+		#{memberRole})
+	</insert>
+	
+</mapper>
+
+	

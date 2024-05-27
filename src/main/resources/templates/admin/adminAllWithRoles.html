@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<!-- layout dialect 적용  -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}"
+	lang="ko-kr">
+<head>
+<meta charset="UTF-8">
+<title>관리자 화면</title>
+<!-- bootstrap -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<!-- <script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script> -->
+
+<!-- bootstrap icons :  -->
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"> -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css}">
+
+<!-- AJAX library axios -->
+<script th:src="@{'/axios/1.5.0/dist/axios.min.js'}"></script>
+
+<!-- 관리자 모드 Javascript -->
+<script th:src="@{'/js/admin_viewAll.js'}" charset="UTF-8"></script>
+
+<!-- 관리자 모드 css -->
+<!-- <link rel="stylesheet" href=""> -->
+
+<style>
+*{
+	font-family: Pretendard-Regular;
+}
+.mypage_title_wrap {
+  margin-top: 76px;
+  
+}
+
+
+th.nav-item:hover {
+  color: #0DCAF0;
+  cursor: pointer;
+}
+
+a{
+	text-decoration-line: none;
+	color: #000;
+
+}
+
+a:hover {
+  color: #0DCAF0;
+  cursor: pointer;
+}
+
+[id$=page] {
+	
+	width:150px;
+
+}
+
+.admin_update_sub_title {
+	margin: 32px 0 32px 0;
+}
+
+.fav_section {
+	margin-left: 0px;
+	background: red; 
+	width: 1500px;
+}
+
+.admin_tbl {
+	margin-top:68px;
+}
+
+</style>
+
+</head>
+<body>
+
+	<!-- layout -->
+	<div layout:fragment="content" class="content_section_mypage">
+		<div class="content_section">
+			<div class="menu_name_section"><h2>마이페이지</h2></div>
+			<div class="content_wrapper_mypage">
+				<div class="fav_section">
+				</div>
+				<table class="admin_tbl table" style="width:100%;">
+					<thead>
+					<!-- sec:authorize="isAuthenticated()" sec:authorize="hasRole('ROLE_ADMIN')" -->
+						<tr class="fs-5 justify-content-start">
+							<th sec:authorize="isAuthenticated()" class="nav-item col-2" th:onclick="|location.href='@{/mypage}'|"><a>내정보</a></th>
+							<!-- <th class="col-2" th:onclick="location.href='@{/update.do}'">내정보수정</th> -->
+							<th sec:authorize="isAuthenticated()" class="nav-item col-2"><a th:href="@{/member/update.do}">내정보수정</a></th>
+							<th sec:authorize="isAuthenticated()" class="nav-item col-2"><a th:onclick="|location.href='@{/survey/}'|">선호 / 비선호</a></th>
+							<th sec:authorize="hasRole('ROLE_ADMIN')" class="nav-item col-2"><a th:href="@{/admin/adminAllWithRoles.do}">회원관리(관리자)</a></th>
+							<th sec:authorize="isAuthenticated()" class="nav-item col-2"><a th:id="${'delete_my_btn' + memberDTO.memberId}">회원 탈퇴</a> </th>							
+						</tr>
+					</thead>
+				</table><!-- admin_tbl -->
+			</div><!-- content_wrapper_mypag -->
+	<div>
+		<!-- <p style="font-size:50px; font-weight: bold; font-family: sans-serif;" th:text="${welcome}"></p>
+		test message -->
+		
+			
+		<!-- (검색할) 회원 정보가 없을 경우 -->
+		<div th:if="${#lists.isEmpty(members)}">
+			
+			<script>
+				alert('검색 결과 없음.')
+			</script>
+			
+		</div>		
+		<!-- // (검색할) 회원 정보가 없을경우 -->
+		
+		<!-- (검색할) 회원 정보가 있을 경우 -->
+		
+		<!-- 인자 현황판 (collapse)
+			 : https://getbootstrap.com/docs/5.3/components/collapse/
+		-->
+		
+		<div id="admin_table_wrap" class="collapse" th:if="${#lists.isEmpty(members) == false}">
+			
+			<table class="admin_table table table-striped">
+				<tr>
+				    <th class="page_member_count">총 인원 수</th><td th:text="${pageVO.listCount}"></td>
+					<th class="page_pre">이전 페이지</th><td th:text="${pageVO.prePage}"></td>
+					<th class="page_curr">현재 페이지</th><td th:text="${pageVO.currPage}"></td>
+					<th class="page_next">이후 페이지</th><td th:text="${pageVO.nextPage}"></td>		
+					<th class="page_start">처음 페이지</th><td th:text="${pageVO.startPage}"></td>
+					<th class="page_end">마지막 페이지</th><td th:text="${pageVO.endPage}"></td>
+				</tr>	
+				<tr th:each="member, st : ${members}">
+					<th colspan="1">회원 정보</th>
+					<td colspan="11">
+						<span th:text="${member}"></span><br>
+					</td>
+				</tr>
+			</table>			
+		</div>
+		
+		<h2 class="admin_update_sub_title d-flex justify-content-center">
+			회원 관리
+			<!-- 인자 현황 버튼 이동 -->
+			<!-- &nbsp;<button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#demo">인자 현황</button> -->
+		</h2>
+		
+		<!-- 회원정보 시작 -->
+		<table class="table mx-2 mx-auto" style="width:95vw">
+			<thead>
+				<tr>
+					<th>번호</th>
+					<th>아이디</th>
+					<th>이름</th>
+					<th>닉네임</th>
+					<th>성별</th>
+					<th>이메일</th>
+					<th>휴대폰</th>
+					<th>우편번호</th>
+					<th>기본주소(도로명)</th>
+					<th>기본주소(지번)</th>
+					<th>상세주소</th>
+					<th>생일</th>
+					<th>가입일</th>
+					<th>등급(role)</th>
+					<th>&nbsp;</th>
+					<th>활동여부</th>
+					<th>&nbsp;</th>
+					<th>메뉴</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- members 가 비어있지 않으면... -->
+				<tr th:if="${not #lists.isEmpty(members) && pageVO.listCount > 0}" 
+					th:each="member, st : ${members}">
+					<td th:text="${st.count + (pageVO.currPage - 1) * 10}"></td>
+					<td th:utext="${member.get('MEMBER_ID')}"></td>
+					<td th:utext="${member.get('MEMBER_NAME')}"></td>
+					<td th:utext="${member.get('MEMBER_NICK')}"></td>
+					<td th:utext="${member.get('MEMBER_GENDER') == 'm' ? '남' : '여'}"></td>
+					<td th:utext="${member.get('MEMBER_EMAIL')}"></td>
+					
+					<td>
+						<input type="text" th:value="${member.get('MEMBER_MOBILE')}"
+							   th:id="${'mobile_' + member.get('MEMBER_ID')}"
+							   th:name="${'mobile_' + member.get('MEMBER_ID')}"
+							   readonly
+							   style="border:0"
+							   size="13"
+							   maxlength="13"/>
+					</td>
+					
+					<td th:utext="${member.get('MEMBER_ZIP')}"></td>
+					<td th:utext="${member.get('MEMBER_ROAD_ADDRESS')}"></td>
+					<td th:utext="${member.get('MEMBER_JIBUN_ADDRESS')}"></td>
+					<td th:utext="${member.get('MEMBER_DETAIL_ADDRESS')}"></td>
+					<td th:utext="${#dates.format(member.get('MEMBER_BIRTHDAY'), 'yyyy년 MM월 dd일')}"></td>
+					<td th:utext="${#dates.format(member.get('MEMBER_JOIN_DATE'), 'yyyy년 MM월 dd일 HH:mm:ss')}"></td>
+					
+					<td>
+						<div class="form-check">
+						
+							<!-- 회원은 여기서는 비 회원 전환 처리 불가능 하도록 disabled, readonly 처리 -->
+							<label class="form-check-label"
+								   th:for="${'role1_' + member.get('MEMBER_ID')}">회원</label>
+							
+							<input type="checkbox" class="form-check-input"
+								   th:id="${'role1_' + member.get('MEMBER_ID')}"
+								   name="role" value="ROLE_USER"
+								   th:checked="${#strings.contains(member.get('MEMBER_ROLE'), 'ROLE_USER')}"/> 
+							<!-- 편집 불가능한 상태가 되려면 아래의 속성 추가 등록 -->
+							<!-- disabled readionly -->
+							<br>
+							
+							<label class="form-check-label"
+								   th:for="${'role2_' + member.get('MEMBER_ID')}">관리자</label>
+								   
+							<input type="checkbox" class="form-check-input"
+								   th:id="${'role2_' + member.get('MEMBER_ID')}"
+								   name="role" value="ROLE_ADMIN"
+								   th:checked="${#strings.contains(member.get('MEMBER_ROLE'), 'ROLE_ADMIN')}"/>
+						</div>
+					</td>
+					
+					<td>
+						<button type="button" th:id="${'role_update_btn_' + member.get('MEMBER_ID')}" class="btn btn-sm btn-outline-primary">변경</button>
+					</td>
+					
+					<!-- // 등급 (role) -->
+					
+					<!-- 활동 여부 : 스위치 checkvox 활용 
+						 - bootstrap switch
+						 : https://getbootstrap.com/docs/5.3/forms/checks-radios/#switches -->
+					<td>
+						<div class="form-check form-switch">
+							
+							<label th:id="${'label_enabled_' + member.get('MEMBER_ID')}" th:for="${'enabled_' + member.get('MEMBER_ID')}" class="form-check-label"
+								   th:text="${member.get('MEMBER_ENABLED') == 1 ? '활동' : '휴면'}"></label>
+								   
+							<input type="checkbox" class="form-check-input" name="enabled" th:id="${'enabled_' + member.get('MEMBER_ID')}"
+								   th:value="${member.get('MEMBER_ENABLED')}"
+								   th:checked="${member.get('MEMBER_ENABLED') == 1}">
+							
+						</div>
+					</td>
+					
+					<td>
+						<button type="button" th:id="${'enabled_update_btn_' + member.get('MEMBER_ID')}" class="btn btn-sm btn-outline-primary">변경</button>
+					</td>
+					
+					<!-- // 활동 여부 -->
+					
+					<!-- 메뉴 -->
+					<td>
+						<button class="btn btn-sm btn-primary" th:id="${'update_btn' + member.get('MEMBER_ID')}">수정</button>&nbsp;
+						<button class="btn btn-sm btn-primary" th:id="${'delete_btn' + member.get('MEMBER_ID')}">삭제</button>
+					</td>
+					<!-- // 메뉴 -->
+						
+				</tr>
+					
+				<tr th:if="${#lists.isEmpty(members) && pageVO.listCount == 0}">
+					<td colspan="17">
+						<div class="d-flex justify-content-center align-items-center w-100" style="height:50vh">
+							<b>검색된 회원 정보 없음</b>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+				
+			</table>
+			<!-- // 회원 정보 끝 -->
+			
+			
+			<!-- 페이징 -->
+			
+			<!-- 검색이 아닌 경우 -->	
+			<div class="d-flex justify-content-center mt-4" th:if="${#strings.isEmpty(searchKey)}">
+				<nav aria-label="Page navigation example">
+				  <ul class="pagination">
+				    
+				    <!--  첫 페이지 -->
+				    <li class="page-item">
+				      <a class="page-link" th:href="@{/admin/adminAllWithRoles.do?currPage=1}" aria-label="Start">
+				        <span aria-hidden="true">&Lt;</span>
+				      </a>
+				    </li>
+				    
+				    <!-- 이전 페이지 -->
+				    <li class="page-item">
+				      <!-- <a class="page-link" th:href="@{'/admin/viewAllWithRoles.do?currPage='+${pageVO.currPage-1 < 1 ? 1 : pageVO.currPage-1}}" aria-label="Previous"> -->
+				      <a class="page-link" th:href="@{'/admin/adminAllWithRoles.do?currPage='+${pageVO.prePage}}" aria-label="Previous">
+				        <span aria-hidden="true">&lt;</span>
+				      </a>
+				    </li>
+				    
+				    <!-- 페이지가 1개 초과 10이하 일때 분량이 될때 --> 
+	    			<li th:if="${1 < pageVO.maxPage}"
+	    				th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"  
+	    				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+	    				<a class="page-link" th:href="@{'/admin/adminAllWithRoles.do?currPage='+${num}}">[[${num}]]</a>
+	    			</li>
+				    
+				    <li th:if="${pageVO.maxPage == 1}"
+    				th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"  
+    				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+    				<a class="page-link" th:href="@{'/admin/adminAllWithRoles.do?currPage='+${num}}">[[${num}]]</a>
+    			</li>
+				    <!-- 다음 페이지 -->
+				    <li th:if="${pageVO.currPage != pageVO.maxPage}" class="page-item">
+				      <!-- <a class="page-link" th:href="@{'/admin/viewAllWithRoles.do?currPage='+${pageVO.currPage+1 > pageVO.endPage ? pageVO.endPage : pageVO.currPage+1}}" aria-label="Next"> -->
+				      <a class="page-link" th:href="@{'/admin/adminAllWithRoles.do?currPage='+${pageVO.nextPage}}" aria-label="Next">
+				        <span aria-hidden="true">&gt;</span>
+				      </a>
+				    </li>
+				    <!-- 다음 페이지 게시글이 없을 경우 -->
+				    <li th:if="${pageVO.currPage == pageVO.maxPage}" class="page-item">
+				      <!-- <a class="page-link" th:href="@{'/admin/viewAllWithRoles.do?currPage='+${pageVO.currPage+1 > pageVO.endPage ? pageVO.endPage : pageVO.currPage+1}}" aria-label="Next"> -->
+				      <a class="page-link" aria-label="Next">
+				        <span aria-hidden="true">&gt;</span>
+				      </a>
+				    </li>
+				    
+				    <!-- 마지막 페이지 -->
+				    <li class="page-item">
+				      <a class="page-link" th:href="@{'/admin/adminAllWithRoles.do?currPage='+${pageVO.maxPage}}" aria-label="End">
+				        <span aria-hidden="true">&Gt;</span>
+				      </a>
+				    </li>
+				  </ul>
+				</nav>
+			</div>	
+			<!--// 검색이 아닌 경우 -->
+			
+			
+			<!-- 검색인 경우 -->	
+			<div class="d-flex justify-content-center mt-4" th:if="${!#strings.isEmpty(searchKey)}">
+				<nav aria-label="Page navigation example">
+				  <ul class="pagination">
+				    
+				    <!--  첫 페이지 -->
+				    <li class="page-item">
+				      <a class="page-link" th:href="@{'/admin/searchAllWithRoles.do?currPage=1&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="Start">
+				        <span aria-hidden="true">&Lt;</span>
+				      </a>
+				    </li>
+				    
+				    <!-- 이전 페이지 -->
+				    <li class="page-item">
+				      <a class="page-link" th:href="@{'/admin/searchAllWithRoles.do?currPage='+${pageVO.prePage}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="Previous">
+				        <span aria-hidden="true">&lt;</span>
+				      </a>
+				    </li>
+				    
+				    <!-- 페이지가 1개 초과 10이하 일때 분량이 될때 --> 
+		   			<li th:if="${1 <= pageVO.maxPage}"
+		   				th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"  
+		   				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+		   				<a class="page-link" th:href="@{'/admin/searchAllWithRoles.do?searchKey='+${searchKey}+'&searchWord='+${searchWord}+'&currPage='+${num}}">[[${num}]]</a>
+		   			</li>
+		   		
+				    <!-- 다음 페이지 -->
+				    <li th:if="${pageVO.currPage != pageVO.maxPage}" class="page-item">
+				      <a class="page-link" th:href="@{'/admin/searchAllWithRoles.do?currPage='+${pageVO.nextPage}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="Next">
+				        <span aria-hidden="true">&gt;</span>
+				      </a>
+				    </li>
+				    
+				    <!-- 다음 페이지 게시글이 없을 경우 -->
+				    <li th:if="${pageVO.currPage == pageVO.maxPage}" class="page-item">
+				      <a class="page-link" aria-label="Next">
+				        <span aria-hidden="true">&gt;</span>
+				      </a>
+				    </li>
+				    
+				    <!-- 마지막 페이지 -->
+				    <li class="page-item">
+				      <a class="page-link" th:href="@{'/admin/searchAllWithRoles.do?currPage='+${pageVO.maxPage}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="End">
+				        <span aria-hidden="true">&Gt;</span>
+				      </a>
+				    </li>
+				  </ul>
+				</nav>
+			</div>	
+			<!--// 검색인 경우 -->
+			<!--// 페이징 -->
+			
+			
+			<!-- 검색 -->
+			<!-- 간격 : mt-2 mb-5, 줄 단위 배치 : row, 레이아웃 배분 비율 : ex) col-3 (3/12) -->
+			<form th:action="@{/admin/searchAllWithRoles.do}" method="get">
+			
+				<div id="search_pnl" class="mx-auto row mt-2 mb-5" style="width:50vw">
+					
+					<div id="select_pnl" class="col-2 pe-0">
+						<select class="form-select" id="searchKey" name="searchKey" aria-label="검색 구분">
+						  <option selected value="member_id">아이디</option>
+						  <option value="member_name">이름</option>
+						  <option value="member_nick">닉네임</option>
+						  <option value="member_gender">성별</option>
+						  <option value="member_email">이메일</option>
+						  <option value="member_mobile">휴대폰</option>
+						  <option value="member_address">주소</option>
+						  <option value="member_birthday">생일</option>
+						  <option value="member_join_date">가입일</option>
+						  <!-- <option value="member_role">등급(role)</option> -->
+						</select>
+					</div>
+					
+					<div id="search_pnl" class="col-4">					
+						<input type="text" class="form-control" id="searchWord" name="searchWord" placeholder="등급) 관리자, 회원" />
+						
+					</div>
+					
+					<div id="search_btn_pnl" class="col-1 ps-0">
+						<button id="search_btn" class="btn btn-primary">
+							<!-- bootstrap icon
+							     : https://icons.getbootstrap.com/icons/search/  -->
+							<i class="bi bi-search"></i>
+						</button>
+					
+					</div>
+					
+					<div id="list_btn_pnl" class="col-3 ps-0">
+						<a class="btn btn-primary" th:href="@{/admin/adminAllWithRoles.do}">
+							전체 회원 목록 
+						</a>						
+					</div>
+				</div>
+				
+			</form>
+			<!--// 검색 -->
+			</div>
+		</div><!-- content_section -->
+	</div><!-- content_section_mypage -->
+	
+	
+</body>
+</html>

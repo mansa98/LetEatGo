@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>Let Eat Go ♬: 상세 페이지</title>
+
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<!-- axios  -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+
+
+	
+	window.onload = function() {
+		
+/* 		//쿠키 생성
+		function setCookie(cName, cValue, cDay){
+		    var expire = new Date();
+		    expire.setDate(expire.getDate() + cDay);
+		    cookies = cName + '=' + escape(cValue) + '; path=/ ';
+		    // 한글 깨짐을 막기위해 escape(cValue)를 합니다.
+		    if(typeof cDay != 'undefined') cookies += ';expires='
+		        + expire.toGMTString() + ';';
+		    document.cookie = cookies;
+		}
+		
+		// 쿠키 가져오기(cookie)
+		function getCookie(cName) {
+		    cName = cName + '=';
+		    var cookieData = document.cookie;
+		    var start = cookieData.indexOf(cName);
+		    var cValue = '';
+		    if(start != -1){
+		        start += cName.length;
+		        var end = cookieData.indexOf(';', start);
+		        if(end == -1)end = cookieData.length;
+		        cValue = cookieData.substring(start, end);
+		    }
+		    return unescape(cValue);
+		} */
+		
+		
+		
+		
+		// 버튼의 innerHTML 전체를 제어하기 위한 wrapper
+		let thumbsup_btn_wrap = document.getElementById("thumbsup_btn_wrapper");
+		
+		// console.log("버튼 wrap 상태: " + thumbsup_btn_wrap.innerHTML);
+		
+		//좋아요 버튼
+		let thumbsup_btn = document.querySelector("[class='btn btn-outline-danger thumbsup_btn']");
+		
+		console.log("좋아요 버튼?" + thumbsup_btn.innerHTML);
+		
+		// recipeLike(좋아요 갯수)
+		let like = "[[${recipeVO.recipeLike}]]";
+		// recipeNum(레시피 번호)
+		let recipe_num = "[[${recipeVO.recipeNum}]]"
+		// 업데이트가 반영된 좋아요 갯수
+		let new_like = "[[${updatedRecipeVO.recipeLike}]]"
+		// 현재 좋아요 갯수 출력
+		let th_cnt = document.getElementById("thumbsup_count");
+		
+		
+		
+		console.log("좋아요 갯수??" + like);
+		console.log("레시피 번호??" + recipe_num);
+		//console.log("가져온거: " + th_cnt.innerHTML)
+		
+		//let like_clicked_flag = false;
+		
+		let thumbsup_btn_status = "dislike";
+		
+		let click_count = 1;
+		
+		
+//		console.log("■ onload 레벨의 click_count는? " + click_count);
+		// 클릭횟수가 홀수이면 status는 "dislike"
+//		if (click_count % 2 == 1) {
+//			thumbsup_btn_status = "dislike";
+		// 클릭횟수가 짝수이면 status는 "like"	
+//		} else if (click_count % 2 == 0) {
+//			thumbsup_btn_status = "like";
+//		}
+		
+//		console.log("▼ 이해할수 없는 로직을 거친 후의 버튼 상태는? " + thumbsup_btn_status);
+		console.log("▼ 온로드(온클릭 최초 들어가기전 버튼 상태)? " + thumbsup_btn_status);
+		
+		// 좋아요 버튼을 클릭했을때!!		
+		thumbsup_btn.onclick = function(e) {
+			click_count += 1;
+			
+			if (click_count > 10) {
+				alert("제발 그만 좀 하세요!!!");
+			}
+			
+			console.log("● 온클릭 들어온 직후의 버튼 상태: " + thumbsup_btn_status);
+			
+//			console.log("● 온클릭 들어온 직후의 클릭횟수: " + click_count);
+			
+			// 여기서 버튼 상태 변경됨
+			thumbsup_btn_status = thumbsup_btn_status == "dislike" ? "like" : "dislike";
+			
+			console.log("＠ 선생님 로직을 거친 후의 버튼 상태: " + thumbsup_btn_status);
+			
+			if (thumbsup_btn_status == "like") {
+				
+				axios.post(`/recipe/raiseLike`, null, {
+					params:{
+						recipeLike: like,
+						recipeNum: recipe_num
+					}
+				})
+				.then(function(response) {
+					console.log("좋아요 올리기 응답결과: " + response.data);
+					
+					// th_cnt.innerHTML = `좋아요: [[${updatedRecipeVO.recipeLike + 1}]]개`;
+					
+					thumbsup_btn.setAttribute("class", "btn btn-danger thumbsup_btn");
+					thumbsup_btn.innerHTML = `좋아요<i class="bi bi-hand-thumbs-up-fill"></i>`;
+					//thumbsup_btn_wrap.innerHTML = `<button id="thumbsup_btn" class="btn btn-danger thumbsup_btn">좋아요<i class="bi bi-hand-thumbs-up-fill"></i></button><hr>`;
+					console.log("★ axios 통신 후 버튼 상태: " + thumbsup_btn_status); 
+//					click_count += 1;
+//					console.log("★ axios 통신 후 클릭 횟수: " + click_count);
+				})
+				.catch(function(err){
+					console.log("에러발생: " + err);
+				});// axios
+			
+			}// if
+			
+			if (thumbsup_btn_status == "dislike") {
+				
+				axios.post(`/recipe/decreaseLike`, null, {
+					params:{
+						recipeLike: like,
+						recipeNum: recipe_num
+					}
+				})
+				.then(function(response) {
+					console.log("좋아요 내리기 응답결과: " + response.data);
+					// th_cnt.innerHTML = `좋아요: [[${updatedRecipeVO.recipeLike}]] 개`;
+					
+					thumbsup_btn.setAttribute("class", "btn btn-outline-danger thumbsup_btn");
+					thumbsup_btn.innerHTML = `좋아요<i class="bi bi-hand-thumbs-up"></i>`;
+					
+					console.log("★ axios 통신 후 버튼 상태: " + thumbsup_btn_status); 
+//					click_count += 1;
+//					console.log("★ axios 통신 후 클릭 횟수: " + click_count);
+					
+				})
+				.catch(function(err){
+					console.log("에러발생: " + err);
+				});// axios
+
+			}// if
+
+			
+			
+		}// onclick
+		
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		
+		// 즐겨찾기 wrap
+		let fav_btn_wrap = document.getElementById("favorite_btn_wrapper");
+		//console.log("즐겨찾기 버튼 wrap: " + fav_btn_wrap.innerHTML);
+		
+		// 즐겨찾기 버튼
+		let fav_btn = document.getElementById("favorite_btn");
+		// console.log("즐겨찾기 버튼: " + fav_btn.innerText);
+		
+		// 즐겨찾기 상태 기억을 위한 비교용 id 추가!
+		let favVOMemberId = "[[${favVO.memberId}]]";
+		
+		console.log("this is favVO's memberID: " + favVOMemberId);
+		
+		let memberId = "[[${memberId}]]";
+		
+		console.log("this is memberId: " + memberId);
+
+		
+		// 상태: add_fav <-> del_fav
+		let fav_btn_status = "del_fav";
+		
+		console.log("★ 즐겨찾기 버튼의 처음 상태: " + fav_btn_status);
+		
+		fav_btn.onclick = function(e) {
+			
+			// 여기서 버튼 상태 변경됨
+			fav_btn_status = fav_btn_status == "del_fav" ? "add_fav" : "del_fav";
+			
+			console.log("＠ 선생님 로직을 거친 후의 버튼 상태: " + fav_btn_status);
+			
+			// 즐겨찾기 상태 기억을 위한 로직(이미 즐겨찾기 추가 상태면 바로 즐겨찾기 삭제 if문으로 이동시킴)
+			if (favVOMemberId == memberId) {
+				
+				fav_btn_status = "del_fav";
+				favVOMemberId = "";
+				
+			}
+			
+			console.log("★ 즐겨찾기 상태 기억 현황: " + fav_btn_status);
+			
+			// 즐겨찾기에 추가
+			if (fav_btn_status == "add_fav") {
+				
+				axios.post(`/recipe/addFav`, null, {
+					params:{
+						recipeNum: recipe_num
+					}
+				})
+				.then(function(response) {
+					console.log("즐겨찾기 저장 응답결과: " + response.data);
+					
+					fav_btn.setAttribute("class", "btn btn-warning favorite_btn");
+					fav_btn.innerHTML = `즐겨찾기<i class="bi bi-star-fill"></i>`;
+					//thumbsup_btn_wrap.innerHTML = `<button id="thumbsup_btn" class="btn btn-danger thumbsup_btn">좋아요<i class="bi bi-hand-thumbs-up-fill"></i></button><hr>`;
+					console.log("★ axios 통신 후 버튼 상태: " + fav_btn_status); 
+//					click_count += 1;
+//					console.log("★ axios 통신 후 클릭 횟수: " + click_count);
+					if (response.data == "즐겨찾기 저장에 실패하였습니다.") {
+						
+						//alert("이미 해당 레시피가 즐겨찾기에 등록되어있습니다. 한번 더 누르시면 즐겨찾기에서 제외됩니다.")
+					}
+
+				})
+				.catch(function(err){
+					console.log("즐겨찾기 저장 도중 에러발생: " + err);
+				});// axios
+			
+			}// if
+			
+			// 존재하는 즐겨찾기 삭제
+			if (fav_btn_status == "del_fav") {
+				
+				axios.post(`/recipe/delFav`, null, {
+					params:{
+						recipeNum: recipe_num
+					}
+				})
+				.then(function(response) {
+					console.log("즐겨찾기 삭제 응답결과: " + response.data);
+					
+					fav_btn.setAttribute("class", "btn btn-outline-warning favorite_btn");
+					fav_btn.innerHTML = `즐겨찾기<i class="bi bi-star"></i>`;
+					
+					console.log("★ axios 통신 후 버튼 상태: " + fav_btn_status); 
+//					click_count += 1;
+//					console.log("★ axios 통신 후 클릭 횟수: " + click_count);
+					
+				})
+				.catch(function(err){
+					console.log("즐겨찾기 삭제 도중 에러발생: " + err);
+				});// axios
+
+			}// if
+
+			
+			
+		}// onclick
+		
+		
+	}
+	
+</script>
+<style>
+.content_section_detail {
+	/* background-color: gray; */
+	width: 100%;
+	min-height: inherit;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.detail_page_name {
+	width: 100%;
+	height: 200px;
+	font-size: 2.5em;
+	font-family: Pretendard-Regular;
+	padding: 50px 0 0 200px;
+	/* background: orange; */
+	
+}
+
+.content_section_detail div[class="detail_page_container"] {
+	/* background-color: silver; */
+	width: calc(100% - 400px);
+	/* min-height: 600px; */
+	height: fit-content;
+	margin-bottom: 30px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#page_info_section {
+	width: 100%;
+	text-align: right;
+	/* background: cyan; */
+	color: gray;
+	padding-right: 50px;
+	
+}
+
+.content_section_detail div[class="detail_page_container"]:nth-child(2) {
+	/* background: pink; */
+
+}
+
+.content_section_detail div[class="detail_page_container"]:nth-child(3) {
+	/* background: skyblue; */
+	min-height: 300px;
+	position: relative;
+
+}
+
+.content_section_detail div[class="detail_page_container"]:nth-child(4) {
+	/* background: yellowgreen; */
+	min-height: 400px;
+	position: relative;
+
+}
+
+.recipe_detail_image img {
+	object-fit: cover;
+	border-radius: 2%;
+}
+
+.recipe_detail_title {
+	margin-top: 100px;
+	width: 100%;
+	font-family: Pretendard-Regular;
+	font-size: 1.9em;
+	text-align: right;
+	padding-right: 50px;
+}
+
+.recipe_detail_og_writer {
+	width: 100%;
+	font-size: 1.5em;
+	text-align: right;
+	padding-right: 50px;
+}
+
+.recipe_detail_og_writer span {
+	color: silver;
+}
+
+.recipe_detail_ingredients_title {
+	position: absolute;
+	top: 50px;
+	left: 50px;
+	/* background: coral; */
+	width: 95%;
+	font-family: Pretendard-Regular;
+	
+}
+
+.recipe_detail_ingredients_title span {
+	font-size: 2em;
+}
+
+.recipe_detail_ingredients_title hr {
+	border: 1px solid black;
+}
+
+.recipe_detail_ingredients {
+	width: 90%;
+	/* background: blue; */
+	margin-top: 100px;
+	margin-bottom: 70px;
+	
+}
+
+div[class^="recipe_detail_ingr_"] {
+	font-size: 1.4em;
+	margin-top: 50px;
+	font-family: Pretendard-Regular;
+	letter-spacing: 2px;
+}
+
+.recipe_detail_cookery_title {
+	position: absolute;
+	top: 50px;
+	left: 50px;
+	/* background: coral; */
+	width: 95%;
+	font-family: Pretendard-Regular;
+	
+}
+
+.recipe_detail_cookery_title span {
+	font-size: 2em;
+}
+
+.recipe_detail_cookery_title hr {
+	border: 1px solid black;
+}
+
+.recipe_detail_cookery {
+	/* background: pink; */
+	width: 80%;
+}
+
+.recipe_detail_cookery .recipe_cookery {
+	margin-top: 200px;
+	/* background: blue; */
+	display: flex;
+	flex-direction: column;
+	align-items: left;
+}
+
+.recipe_cookery_step:nth-child(n) {
+	/* background: #C0C0C0; */
+	margin: 0 0 30px 0;
+	height: 300px;
+	font-size: 22px;
+	letter-spacing: 2px;
+	/* margin: 0 0 50px 0; */
+}
+
+.recipe_cookery_step:nth-child(2n+1) {
+	/* background: #00C1DD; */
+	color: black;
+	font-family: Pretendard-Regular;
+	/* margin: 0 0 50px 0; */
+}
+
+.recipe_cookery_step:nth-child(2n) {
+	/* background: #C0C0C0; */
+	background: #FFFFFF;
+	/* color: black; */
+	font-family: Pretendard-Regular;
+	/* margin: 0 0 50px 0; */
+}
+
+.recipe_detail_cookery .recipe_cookery_images {
+	margin-top: 200px;
+	/* background: #643; */
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+.recipe_cookery_image {
+	height: 300px;
+	width: 300px;
+	margin-bottom: 30px;
+}
+
+.recipe_cookery_image img{
+	width: inherit;
+	height: inherit;
+	border-radius: 5%;
+	object-fit: cover;
+}
+
+.thumbsup_section {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	padding: 30px;
+}
+
+#thumbsup_btn_wrapper {
+	margin-right: 10px;
+}
+
+#favorite_btn_wrapper {
+	margin-left: 10px;
+}
+
+
+</style>
+</head>
+<body>
+	<div layout:fragment="content" class="content_section" th:object="${recipeVO}">
+	
+		<!-- <div class="d-flex flex-column mt-5" th:object="${recipeVO}">
+			<span th:text="${recipeVO.recipeTitle}"></span>
+			<span th:text="${recipeVO.recipeOgWriter}"></span>
+			<img th:src="${recipeVO.recipeImage}"></img>
+			<span th:text="${recipeVO.recipeIngrMain}"></span>	
+			<span th:text="${recipeVO.recipeIngrSeasoning}"></span>
+			<span th:utext="${recipeVO.recipeCookery}"></span>
+			<span th:utext="${recipeVO.recipeCookeryImages}"></span>
+		</div> -->
+		
+		<div class="content_section_detail">
+			<!-- 페이지 이름(상세 페이지) -->
+			<div class="detail_page_name">
+				레시피
+			</div>
+			<!-- //페이지 이름 -->
+			
+			<!-- 레시피 사진, 제목, 작성자 -->
+			<div class="detail_page_container">
+				<div class="recipe_detail_image">
+					<img th:src="${recipeVO.recipeImage}" width=1000px height=700px>
+				</div>
+				<div class="recipe_detail_title">
+					<span th:text="${recipeVO.recipeTitle}"></span>
+				</div>
+				<div class="recipe_detail_og_writer">
+					<span th:text="${recipeVO.recipeOgWriter}"></span>
+				</div>
+				<div id="page_info_section">
+					<i class="bi bi-eye"></i> <span th:text="${updatedRecipeVO.recipeCount} + '회'"></span> <i class="bi bi-hand-thumbs-up-fill"></i> <span th:text="${updatedRecipeVO.recipeLike} +'개'"></span> 
+				</div>
+			</div>
+			<!-- //레시피 사진, 제목, 작성자 -->
+			
+			<!--  레시피 재료 -->
+			<div class="detail_page_container">
+				<div class="recipe_detail_ingredients_title">
+					<span>재료</span>
+					<hr>
+				</div>
+				<div class="recipe_detail_ingredients row">
+					<div class="recipe_detail_ingr_main col-12" >
+						<span style="font-weight: bold;">메인 재료:</span>
+						<span th:text="${recipeVO.recipeIngrMain}"></span>
+					</div>
+					<div th:if="not ${recipeVO.recipeIngrSeasoning == null}" class="recipe_detail_ingr_seasoning col-12">
+						<span style="font-weight: bold;">양념 재료:</span>
+						<span th:text="${recipeVO.recipeIngrSeasoning}"></span>
+					</div>
+				</div>
+			</div>
+			<!-- // 레시피 재료 -->
+			
+			<!-- 레시피 조리법 -->
+			<div class="detail_page_container">
+				<div class="recipe_detail_cookery_title">
+					<span>조리순서</span>
+					<hr>
+				</div>		
+				<div class="recipe_detail_cookery row">
+					<div class="recipe_cookery col-8" th:utext="${recipeVO.recipeCookery}">
+							
+					</div>
+					<div class="recipe_cookery_images col-4" th:utext="${recipeVO.recipeCookeryImages}">
+						
+					</div>
+				</div>		
+			</div>
+			<!-- // 레시피 조리법 -->
+			<div class="thumbsup_section">
+				<div sec:authorize="isAuthenticated" id="thumbsup_btn_wrapper">
+					<button id="thumbsup_btn" class="btn btn-outline-danger thumbsup_btn">좋아요<i class="bi bi-hand-thumbs-up"></i></button>
+				</div>
+				<div sec:authorize="isAuthenticated" id="favorite_btn_wrapper">
+					<button th:unless="${favVO.memberId == memberId}" id="favorite_btn" class="btn btn-outline-warning favorite_btn">즐겨찾기<i class="bi bi-star"></i></button>
+					<button th:if="${favVO.memberId == memberId}" id="favorite_btn" class="btn btn-warning favorite_btn">즐겨찾기<i class="bi bi-star-fill"></i></button>
+				</div>
+				<!-- 조회수: [[${updatedRecipeVO.recipeCount + 1}]] 회 [[${updateCountResult}]]
+				<div id="thumbsup_count">좋아요: [[${updatedRecipeVO.recipeLike}]] 개</div> -->
+			</div>
+		</div>
+		
+		
+		
+	</div>
+
+</body>
+</html>

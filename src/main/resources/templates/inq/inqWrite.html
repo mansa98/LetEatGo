@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko-kr"
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>문의사항 글작성</title>
+<!-- bootstrap -->
+<!-- <link rel="stylesheet"
+	th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script> -->
+
+<!-- summernote lite -->
+<script th:src="@{/jquery/3.7.1/jquery.min.js}"></script>
+
+<link th:href="@{/summernote/0.8.18/dist/summernote-lite.min.css}"
+	rel="stylesheet">
+<script th:src="@{/summernote/0.8.18/dist/summernote-lite.min.js}"></script>
+
+<!-- summernote 한글 지원 관련 -->
+<script th:src="@{/summernote/0.8.18/lang/summernote-ko-KR.js}"></script>
+
+<script>
+// summmernote 삽입 이미지 파일 업로드 전송
+function sendFile(file, el) {
+
+  // FormData 객체 
+  // : https://developer.mozilla.org/ko/docs/Web/API/FormData
+  let formData = new FormData();
+  formData.append('file', file);
+  
+  // jQuery AJAX
+  $.ajax({
+	  
+    data: formData,
+    /* type: "POST", // 업로드시 필수사항
+    url: '/inq/inq/image', */
+    type: "POST",
+    url: '/inq/image',
+    cache: false,
+    contentType: false,
+    enctype: 'multipart/form-data', // 업로드시 필수사항 
+    processData: false,
+    
+    success: function(url) {
+    	
+    	console.log("이미지 URL : ", url);
+    
+    	$(el).summernote('editor.insertImage', url);
+    	
+     	// $('#imageInq').append('<li><img src="'+url+'" width="480" height="auto"/></li>');
+     	
+    } //
+    
+  });
+  
+}
+
+$(function() {
+	
+	// case-1
+	// $('#inqContent').summernote(
+			
+	// case-2
+	$('#inqContentDiv').summernote(
+			{
+				placeholder : '게시글 내용을 작성하십시오',
+				tabsize : 2,
+				height : 300,
+				toolbar : [ [ 'style', [ 'style' ] ],
+						[ 'font', [ 'bold', 'underline', 'clear' ] ],
+						[ 'color', [ 'color' ] ],
+						[ 'para', [ 'ul', 'ol', 'paragraph' ] ],
+						[ 'table', [ 'table' ] ],
+						[ 'insert', [ 'link', 'picture', 'video' ] ],
+						[ 'view', [ 'fullscreen', 'codeview', 'help' ] ] ]
+				,lang : 'ko-kr',
+				
+				// 참고) 전송 방법
+				// 참고로, 컨텐츠 내의 삽입 이미지들을 아래와 같이 파일 업로드 처리를 하지 않으면,
+				// base64 알고리즘으로 암호화된 데이터 스트림(data stream) 형태로 전송됩니다.
+				
+				// - 컨텐츠 내부의 삽입 이미지들 업로드 API Guide
+				// : https://summernote.org/deep-dive/#callbacks			
+				
+				// 참고) 콜백 함수(callback) 
+			    // : https://developer.mozilla.org/ko/docs/Glossary/Callback_function
+				callbacks : {
+					
+					// 참고) onImageUpload 이벤트(event)
+					// : https://summernote.org/deep-dive/#onimageupload
+					
+					onImageUpload: function(files, editor, welEditable) {
+						
+						console.log("업로드할 이미지 파일들 : ", files.length);
+						
+		                for (var i = files.length - 1; i >= 0; i--) {
+		              		sendFile(files[i], this);
+		                } // for
+		              
+		            } // onImageUpload
+					
+				} //callbacks
+			
+			});
+});
+
+window.onload = function() {
+	
+	// 첨부 파일 삭제 기능 추가 : 2024.3
+	let fileDeleteBtn = document.getElementById("fileDeleteBtn");	
+	
+	fileDeleteBtn.onclick = () => {
+		
+		alert("첨부 파일을 삭제합니다");
+		let inqFile = document.getElementById("inqFile");
+		inqFile.value = "";
+	} //
+	
+	// TODO
+	// case-2
+	// 게시글 내용
+	let inqContentDiv= document.getElementById("inqContentDiv");
+	let inqContentHidden = document.getElementById("inqContent");
+	let inqForm = document.getElementById("inq_write_frm");
+	
+	// case-2
+	// 폼점검
+	inqForm.onsubmit = function(e) {
+		
+		// summernote actual component : 썸머노트의 실제 글내용 컴포넌트
+		// F12 → Elements 탭 메뉴 코너에서 확인할 수 있습니다.
+		// let summernoteActualContent = document.querySelector(".note-editable");
+		let summernoteActualContent = document.querySelector(".note-editable");
+		
+		// TODO
+		let content = summernoteActualContent.innerHTML;
+		
+		// 주의) summernote
+		// 비어 있는 초기 상태 :  "<p><br></p>"(초기)
+		// 편집 후 공백 : ""(편집중 공백)
+		// <p>&nbsp;</p>
+		// "<p><br></p>", "<p>&nbsp; &nbsp;</p>" => 공백 치환
+		
+		content = content.replaceAll('<p><br></p>', '')
+					     .replaceAll('&nbsp;', '')
+					     .replaceAll('<p>', '')
+					     .replaceAll('</p>', '')
+					     .trim()
+					     
+		// 실제 전송용 hiddedn 필드에 입력
+		inqContentHidden.value = content; 
+		
+		console.log("content : ", content.length);
+		
+		if (content.length == 0) {
+		
+			alert("게시글 내용을 입력하십시오.");
+			summernoteActualContent.focus(); // 썸머노트의 실제 글내용 컴포넌트에 focus(입력 대기)
+			
+			// 전송 취소
+			return false;
+		} 
+		
+		// 파일 업로드 사이즈 체크 : 10MB 보다 큰지 점검
+		let inqFile = document.getElementById("inqFile");
+
+		//let uploadFileSize = inqFile.files[0].size;
+		// 빈 파일일 경우
+		let uploadFileSize = (inqFile.value == "") ? 0 : inqFile.files[0].size;
+
+		const maxUploadFileSize = 10 * 1024 * 1024; // 10MB
+		
+		if (uploadFileSize > maxUploadFileSize) {
+			
+			alert("10 MB 보다 큰 파일은 올릴 수 없습니다.");
+			inqFile.value = ""; // 초기화
+			inqFile.focus(); // 재입력 대기
+			
+			return false;
+		} //
+		
+	} //
+	
+}
+</script>
+</head>
+<style>
+	.layout{
+		width : 1000px;
+		margin : 0 auto;
+		margin-top : 200px;
+	}
+	
+	.layout input{
+		width : 100%;
+		box-sizing : inqer-box;
+		margin-top : 10px;
+	}
+	
+	.layout textarea{
+		width : 100%;
+		margin-top : 10px;
+		min-height : 300px;
+	}
+</style>
+<body>
+
+<div layout:fragment="content" class="main_sect_pnl mt-5">
+
+		<div class="content_sect_pnl">
+
+			<form id="inq_write_frm" th:action="@{'/inq/writeProc.do'}"
+				encType="multipart/form-data" method="post">
+
+				<h2 class="d-flex justify-content-center">문의사항 글 작성</h2>
+
+				<table class="table mx-auto mt-4" style="width: 800px;">
+
+					<tr>
+						<th scope="col">작성자</th>
+						<!-- 인증 회원이상 작성할 수 있으므로 작성자는 기본값 자동 완성/읽기전용 처리 -->
+						<td colspan="2"><input type="text" class="form-control" id="inqWriter"
+							name="inqWriter" th:value="${#authentication.principal.memberNick}" readonly /></td>
+					</tr>
+
+					
+					<tr>
+						<th scope="col">제목</th>
+						<td colspan="2"><input type="text" class="form-control" id="inqTitle"
+							name="inqTitle" required title="글제목을 입력하십시오" /></td>
+					</tr>
+
+					<tr>
+						<th scope="col">내용</th>
+						<td colspan="2">							
+							<!-- case-1 -->
+							<!-- <textarea class="form-control" id="inqContent"
+								name="inqContent" required></textarea> -->
+														
+							<!-- case-2 -->
+							<div id="inqContentDiv"></div>
+							<input type="hidden" id="inqContent" name="inqContent" />
+							<!-- <input type="text" id="inqContent" name="inqContent" readonly /> -->
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="col">첨부파일</th>
+						<td colspan="2">
+							<!-- 첨부 파일 삭제 기능 추가 : 2024.3 -->
+							<div class="row">
+								<div class="col-10">
+									<input class="form-control" type="file" id="inqFile"
+										name="inqFile">
+								</div>	
+								<div class="col-2">
+									<a href="#" class="btn btn-sm btn-info mt-1" id="fileDeleteBtn">첨부 삭제</a>
+								</div>
+							</div>	
+						</td>
+					</tr>
+
+				</table>
+
+				<div class="d-flex justify-content-center mb-5">
+					<button type="submit" class="btn btn-info">작성</button>
+					&nbsp;
+					<a type="button" class="btn btn-info" th:href="@{/inq/list.do}">취소</a>
+				</div>
+
+			</form>
+
+		</div>
+		<!--// content -->
+
+	</div>
+	
+	
+<!-- <div layout:fragment="content" class="main_sect_pnl">
+<h1>커뮤니티</h1>
+<div class="content_sect_pnl">
+<form id="inq_write_frm" th:action="@{'/inq/writeProc.do'}">
+
+	<div class="layout">
+		<div>분류</div>
+		<div>제목<input name="title" type="text"></div>
+		 
+	    <div id="content">
+	
+	    </div>
+	
+		<div>내용<textarea name="content"></textarea></div>
+		<input type="file" name="file">
+		<button type="submit">작성</button>
+    
+	</form>
+	</form>
+	</div>
+	
+	</div> -->
+</body>
+</html>

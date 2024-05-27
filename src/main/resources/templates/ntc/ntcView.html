@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>게시글 보기</title>
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script>
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<!-- 댓글 전송용  -->
+<!-- AJAX library axios -->
+<script th:src="@{'/axios/1.5.0/dist/axios.min.js'}"></script>
+
+<!-- 코드 다량 발생 → 별도 파일화 -->
+<script th:src="@{'/js/ntc_view.js'}"></script>
+
+<!-- 댓글 제어 -->
+<script>
+window.onload = () => {
+	let ntcNum = '[[${ntc.ntcNum}]]';
+	deleteNtc(ntcNum);}
+</script>
+</head>
+
+<body>
+	<div layout:fragment="content" class="main_sect_pnl">
+		<div class="content_sect_pnl">
+			<h2 class="d-flex justify-content-center">공지사항</h2>
+		<div class="layout list_view_update">
+			<div class="mx-auto mt-4 d-flex  justify-content-between" style="width: 970px;">
+				<!-- 뒤로가기 -->
+				<div><a type="button" class="btn" style="background-color:#eee;" th:href="@{/ntc/list.do}"><i class="bi bi-arrow-left"></i> 뒤로가기</a></div>
+				<div class="d-flex">
+				<!-- 회원이면 글 수정(본인만) -->
+				<!-- th:if="${ntc.ntcWriter == #authentication.principal.memberNick}" -->
+				<div sec:authorize="hasRole('ROLE_USER')">
+				<a type="button" class="btn" style="background-color:#eee;"
+				th:if="${ntc.ntcWriter == #authentication.principal.memberNick}"
+				th:href="@{/ntc/update.do/{id}(id = ${ntc.ntcNum})}">글 수정</a>
+				</div>
+				<!-- 회원이면 글 삭제(본인만) -->
+				<div sec:authorize="hasRole('ROLE_USER') and !hasRole('ROLE_ADMIN')">
+				<a type="button" class="btn btn-danger ms-2"
+				th:if="${ntc.ntcWriter == #authentication.principal.memberNick}"
+				th:id="${'ntc_delete_btn_' + ntc.ntcNum}" href="#">글 삭제</a>
+				</div>
+				<!-- 관리자면 글 삭제(전부다) -->
+				<div sec:authorize="hasRole('ROLE_ADMIN')">
+				<a type="button" class="btn btn-danger ms-2"
+				th:id="${'ntc_delete_btn_' + ntc.ntcNum}" href="#">글 삭제</a>
+				</div>
+				</div>
+			</div>
+	<div>
+		<!-- <a type="button" class="btn btn-info" th:href="@{/ntc/list.do}">back</a>
+				&nbsp; -->
+	<table class="table mx-auto mt-4" style="width: 970px;">
+		<tr>
+			<th scope="col">번호</th>
+			<td th:utext="${ntc.ntcNum}"></td>
+		</tr>
+		
+		<tr>
+			<th scope="col">제목</th>
+			<td th:utext="${ntc.ntcTitle}"></td>
+		</tr>
+		<tr>	
+			<th scope="col">내용</th>
+			<td>
+				<div id="ntcContentDiv" th:utext="${ntc.ntcContent}" contentdeditable="false"></div>
+			</td>
+		</tr>
+		<tr>
+			<th scope="col">작성자</th>
+			<td th:utext="${ntc.ntcWriter}"></td>
+		</tr>
+		<tr>
+			<th scope="col">등록일</th>
+			<td th:utext="${#dates.format(ntc.ntcDate, 'yy.MM.dd HH:mm')}"></td>
+		</tr>
+		<tr>
+		<th scope="col">첨부파일</th>
+			<td>
+				<span th:if="${#strings.isEmpty(ntc.ntcFile)}">첨부 파일 없음</span>
+				
+				<a th:href="@{'/ntc/download/'+${ntc.ntcOriginalFile}+'/'+${ntc.ntcFile}}"
+				   th:if="${!#strings.isEmpty(ntc.ntcOriginalFile)}"		
+				   th:utext="${ntc.ntcOriginalFile}"></a>
+			</td>
+		</tr>
+	</table>
+	</div>
+<!-- <a th:href="@{${ntc.filepath}}">다운받기</a> -->
+<!-- <a th:href="@{/delete(id=${ntc.ntcNum})}">글삭제</a> -->
+		</div>
+		</div>
+		
+	</div>
+</body>
+</html>
+<!-- th:href -> a태그에 경로를 걸 때 사용 -->
+<!-- th:text -> 태그에 문자열을 출력할 때 사용 -->
+ <!-- th:href="@{/delete(id=${ntc.id})" -->

@@ -1,0 +1,77 @@
+@charset "UTF-8";
+
+
+/* 공통 CSS */
+* {
+	
+	font-size:1em;
+	font-family: Pretendard-Regular;
+}
+
+[id$=fld_pnl] {
+    width:800px;
+    height:60px;
+    display:flex; 
+    /* background:cyan; */
+    flex-direction:row;      
+    margin-bottom: 10px;
+}
+
+.fld_label {
+	
+	width:130px;
+}
+
+/* .form-control {
+    width:400px;
+    height:60px;
+    background:cyan;
+    display:flex;
+    align-items:center;
+    flex-direction:row;        
+} */
+
+.form-control_update {
+    width:500px;
+    height:60px;
+    /* background:cyan; */
+    display:flex;
+    align-items:center;
+    flex-direction:row;        
+}
+
+[id$=_btn] {
+	color:#FFFFFF;
+	background-color:#12CBF0;
+	border:3px solid #CCCCCC;
+	border-radius:7px;
+}
+[id$=_btn]:hover {
+	
+	
+	color:#FFFFFF;
+	background-color:#0DCAF0;
+	border-radius:7px;
+	border:3px solid #545454;
+	
+}
+
+.fld_content input[type=text], 
+.fld_content input[type=password],
+.fld_content input[type=email] {
+    /* width:50%; */
+    height:60px;
+    background:#fff; 
+    border:2px solid #ccc;
+    margin-right:1em;
+}
+
+/* 각 필드들 hover 상태 */ 
+.fld_content input[type=text]:hover, 
+.fld_content input[type=password]:hover,
+.fld_content input[type=email]:hover {
+    height:60px;
+    background:#fff; 
+    border:4px solid #999;
+    margin-right:1em;
+}

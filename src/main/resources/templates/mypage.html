@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}">
+<head>
+
+<style>
+
+* {
+	font-family: Pretendard-Regular;
+}
+
+
+th.nav-item:hover {
+  color: #0DCAF0;
+  cursor: pointer;
+}
+
+.content_section_mypage {
+	/* background-color: cyan; */
+	width: 100%;
+	min-height: inherit;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.content_wrapper_mypage {
+	margin-top: 10px;
+	/* background-color: green; */
+	width: calc(100% - 100px);
+	min-height: calc((100vh - 149px) - 100px);
+	/* height: fit-content; */
+	display: flex;
+	justify-content: center;
+}
+
+.fav_section {
+	margin-left: 0px;
+	/* background: red; */
+	width: 1500px;
+}
+
+.fav_recipe_section_wrapper {
+	width: 100%; 
+	min-height:300px;
+	margin-left: 0;
+	/* background: coral; */
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	margin-bottom: 50px;
+}
+
+
+.fav_recipe_section {
+	/* background: pink; */
+	min-height: 300px;
+	width: 330px;
+	margin: 50px 30px 10px 60px; 
+}
+
+.fav_recipe_wrapper {
+	/* background: gray; */
+	width: 100%;
+	min-height: fit-content;
+	display: flex;
+	flex-direction: column;
+}
+
+.fav_img {
+	background-repeat: no-repeat; 
+	background-size: 100% 100%; 
+	border-radius: 2%;
+	width: 330px; 
+	height:260px; 
+}
+
+.fav_title {
+	margin-top: 15px;
+	width: 100%;
+	min-height: 50px;
+	color: black;
+	/* background: green; */
+	font-size: 18px;
+	
+}
+
+.fav_og_writer {
+	width: 100%;
+	/* background: aqua; */
+	text-align: right;
+	color: gray;
+}
+
+.mypage_mar {
+	margin-bottom:58px;
+}
+
+</style>
+<script>
+	
+	function movePage(prm) {
+    	var pageElement = prm;
+    	location.href="/recipe/detailpage?recipeNum=" + pageElement;
+	}
+	
+</script>
+
+
+
+<meta charset="UTF-8">
+<title>MyPage</title>
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<!-- AJAX library axios -->
+<script	th:src="@{'/axios/1.5.0/dist/axios.min.js'}"></script>
+
+<!-- delete용 update 자바스크립트 -->
+<script th:src="@{/js/member_delete.js}" charset="UTF-8"></script>
+</head>
+<body>
+
+<div layout:fragment="content" class="content_section_mypage">
+	<div class="content_section">
+		<div class="menu_name_section"><h2>마이페이지</h2></div>
+		<div class="content_wrapper_mypage">
+			<div class="fav_section">
+				<!-- <p style="font-size:50px; font-weight: bold; font-family: sans-serif;" th:text="${welcome}"></p>
+				test message -->
+				<div class="mypage_mar left col-12">
+					
+				</div>
+				
+				<div>
+					<table class="table" style="width:100%;">
+						<thead>
+							<tr class="fs-5 justify-content-start">
+								<th sec:authorize="isAuthenticated()" class="nav-item col-2" th:onclick="|location.href='@{/mypage}'|"><a>내정보</a></th>
+								<th sec:authorize="isAuthenticated()" class="nav-item col-2" th:onclick="|location.href='@{/member/update.do}'|"><a>내정보수정</a></th>
+								<th sec:authorize="isAuthenticated()" class="nav-item col-2" th:onclick="|location.href='@{/survey/}'|"><a>선호 / 비선호</a></th>
+								<th sec:authorize="hasRole('ROLE_ADMIN')" class="nav-item col-2" th:onclick="|location.href='@{/admin/adminAllWithRoles.do}'|"><a>회원관리(관리자)</a></th>
+								<th sec:authorize="isAuthenticated()" class="nav-item col-2"><a th:id="${'delete_my_btn' + memberDTO.memberId}">회원 탈퇴</a> </th>
+							</tr>
+						</thead>
+					</table>
+				</div>
+				
+				<div class="mt-5 justify-content-start d-flex">
+					<i class="bi bi-person-circle pe-3" style="font-size:3rem; color:silver;"></i>
+					<div class="flex-row ms-3 mt-2" style="color:gray;">
+						<h5 th:text="${#authentication.principal.memberNick}"></h5>
+						<p class="mypage_joindate" th:text="${#dates.format(memberDTO.memberJoinDate, 'yyyy-MM-dd HH:mm:ss')}"></p>
+						<!-- <h4 th:text="${#dates.format(memberDTO.memberJoinDate, 'yyyy-MM-dd HH:mm:ss')}"></h4> -->
+					</div>
+				</div>
+				
+				<p class="mt-5"><h2>즐겨찾는 요리</h2></p>
+				<div class="fav_recipe_section_wrapper">
+					<div class="fav_recipe_section" th:each="fav, favStat : ${favList}"> <!--  -->
+						<div class="fav_recipe_wrapper">
+							<div class="fav_img" th:onclick="|javascript:movePage('${fav.recipeNum}')|" th:style="'background-image:url(' + ${fav.recipeImage} + '); '"></div> <!-- recipe_image -->
+							<div class="fav_title" th:text="${fav.recipeTitle}"></div>
+							<div class="fav_og_writer" th:text="'by ' + ${fav.recipeOgWriter}"></div>
+						</div>
+					</div>
+					<!-- th:if="favDTO=!null" th:each="favNum : ${favDTO.favNums}" 'background-image:url('+ @{/images/favDTO.recipeImage} +');' "${favDTO.recipeTitle}" "${fdvDTO.recipeOgWriter}" -->
+					<!-- <div class="row justify-content-start p-auto mx-auto" >
+						<div id="testimg"  style="background-image:url('../images/별의세기.jpg'); width: 22vw; height:250px;"></div> recipe_image
+						<div>쿠쿠섬 치킨</div>
+					</div>
+					<div class="row justify-content-start p-auto mx-auto" >
+						<div id="testimg" style="background-image:url('../images/별의세기.jpg'); width: 22vw; height:250px;"></div> recipe_image
+						<div>쿠쿠섬 치킨</div>
+					</div>
+					<div class="row justify-content-start p-auto mx-auto">
+						<div id="testimg" style="background-image:url('../images/별의세기.jpg'); width: 22vw; height:250px;"></div> recipe_image
+						<div>쿠쿠섬 치킨</div>
+					</div> -->
+				</div><!-- //fav_recipe_section_wrapper -->
+			</div><!-- //fav_section -->
+		</div>
+	</div><!-- cs -->
+</div>
+	
+
+
+</body>
+</html>

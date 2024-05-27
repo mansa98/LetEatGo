@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- bootstrap webjars -->
+	<link rel="stylesheet"
+		th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+	<script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script>
+
+ <!-- AJAX library axios -->
+    <script th:src="@{'/axios/1.5.0/dist/axios.min.js'}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+     <!-- 주소 검색 서비스 -->
+
+    <!-- daum 우편번호 서비스 외장 JS(Javascript) 파일 링크 -->
+    <!-- 주의사항) 주소 검색 서비스는 일반적으로 서버(가령 live 서버) 없이 
+         실행시 오류가 발생할 수 있기 때문에 반드시 서버가 있는 상황에서 실행시키시기 바랍니다. -->
+    <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
+    <script th:src="@{'/js/member_join.js'}" charset="UTF-8"></script>
+	<script>
+	
+		// 아이디,닉네임 중복 체크
+        
+        	
+	</script>
+	<link th:href="@{'/css/member_join.css'}" rel="stylesheet" />
+
+</head>
+
+<body>
+
+ 	<!-- 회원 가입 -->
+  <div id="form_content_pnl">
+  	<div id="logo">
+		<a th:href="@{'/'}"><img id="mainlogo" th:src="@{/images/blue.png}" width="150" height="32" /></a>
+	</div>
+	<h2>회원 가입</h2>
+ 	<div id="form_content_box">
+		
+		<form id="frm" th:action="@{'/member/joinproc'}" method="post" autocomplete="off" th:object="${memberDTO}">
+    		<!-- 회원 아이디-->	
+            <div id="id_fld_pnl">	
+            
+                <div class="fld_label">
+                    <label for="id">아이디</label>
+                </div>
+                
+                <div class="fld_content">
+                    <input type="text" id="memberId" name="memberId" maxlength="20" th:field="*{memberId}" placeholder=""/> 
+                    <button type="button" id="idCheck_btn">중복 확인</button>
+                </div>			
+            </div>
+            <!-- 유효성 검사 실패 메시지 표시 -->	
+            <small class="text-danger" th:if="${#fields.hasErrors('memberId')}" th:errors="*{memberId}"></small>  					
+            <!--// 회원 아이디-->
+            
+            <!-- 회원 패쓰워드 -->	
+            <div id="pw_fld_pnl">	
+                <div class="fld_label">
+                    <label for="password">비밀번호</label>
+                </div>
+                <div class="fld_content">
+                    <!-- <input type="password" id="password" name="password" title="" /> -->
+                    <!-- 입력 필드값 확인 임시 조치, maxlength -->
+                    <input type="text" id="memberPw" name="memberPw" maxlength="20" th:field="*{memberPw}" />
+                </div>
+            </div>
+            <!-- 유효성 검사 실패 메시지 표시 -->
+            <small class="text-danger" th:if="${#fields.hasErrors('memberPw')}" th:errors="*{memberPw}"></small>
+            <!--// 회원 패쓰워드 -->
+            
+            <!-- 회원  이름-->
+            <!-- 이름 용례 추가 -->	
+            <div id="name_fld_pnl">	
+                <div class="fld_label">
+                    <label for="name">이름</label>
+                </div>
+                <div class="fld_content">
+                    <input type="text" id="memberName" name="memberName" th:field="*{memberName}" />&nbsp;
+                </div>    
+            </div>
+            <!-- 유효성 검사 실패 메시지 표시 -->
+            <small class="text-danger" th:if="${#fields.hasErrors('memberName')}" th:errors="*{memberName}"></small>
+            <!--// 회원 이름 -->
+            
+            <!-- 회원 닉네임 -->	
+            <div id="pw_fld_pnl">	
+                <div class="fld_label">
+                    <label for="nickname">닉네임</label>
+                </div>
+                <div class="fld_content">
+                    <!-- 입력 필드값 확인 임시 조치, maxlength -->
+                    <input type="text" id="memberNick" name="memberNick" maxlength="20" th:field="*{memberNick}" />
+                    <button type="button" id="nickCheck_btn">중복 확인</button>
+                </div>
+            </div>
+            <!-- 유효성 검사 실패 메시지 표시 -->
+            <small class="text-danger" th:if="${#fields.hasErrors('memberNick')}" th:errors="*{memberNick}"></small>
+            <!--// 회원 닉네임 -->
+            
+            <!-- 회원  성별 -->	
+            <div id="gender_fld_pnl">	
+                <div class="fld_label">
+                    <label>성별</label>
+                </div>
+                <div class="fld_content">                        
+                    <div><input type="radio" id="radio1" name="memberGender" value="m" th:field="*{memberGender}" /></div>
+                    <div><label for="radio1">남</label></div>
+                    <div>&nbsp;</div>                                
+                    <div><input type="radio" id="radio2" name="memberGender" value="f" th:field="*{memberGender}" /></div>
+                    <div>&nbsp;</div>                     
+                    <div><label for="radio2">여</label></div>
+                </div>
+            </div>
+            <!-- 유효성 검사 실패 메시지 표시 -->            
+            <small class="text-danger" th:if="${#fields.hasErrors('memberGender')}" th:errors="*{memberGender}"></small>         
+            <!--// 회원 성별 -->
+                
+            <!-- 회원 생일 -->	
+            <div id="birthday_fld_pnl">	
+                <div class="fld_label">
+                    <label for="birthday">생일</label>
+                </div>    
+                <div class="fld_content">
+                    <input type="text" id="memberBirthday" name="memberBirthday" maxlength="10" placeholder=" ex) 2000-01-01"/>
+                </div>
+            </div>
+            <!-- 유효성 검사 실패 메시지 표시 -->
+            <small class="text-danger" th:if="${#fields.hasErrors('memberBirthday')}" th:errors="*{memberBirthday}"></small>
+            <!--// 회원 생일 -->   
+             
+            <!-- 회원  이메일 -->	
+            <div id="email_fld_pnl">	
+                <div class="fld_label">
+                    <label for="email">
+                        이메일
+                    </label>
+                </div>    
+                <div class="fld_content">
+                    <input type="email" id="memberEmail" name="memberEmail" th:field="*{memberEmail}" placeholder=" ex) abcd@abcd.com"/>
+                </div>
+            </div>
+            <!-- 유효성 검사 실패 메시지 표시 -->
+            <small class="text-danger" th:if="${#fields.hasErrors('memberEmail')}" th:errors="*{memberEmail}"></small>
+            <!--// 회원 이메일 -->
+                
+            <!-- 회원  연락처(휴대폰) -->	
+            <div id="mobile_fld_pnl">	
+                <div class="fld_label">
+                    <label for="mobile">휴대폰</label>
+                </div>
+                <div class="fld_content">
+                    <input type="text" id="memberMobile" name="memberMobile" th:field="*{memberMobile}" placeholder=" ex) 010-1234-5678"/>
+                </div>    
+            </div>
+            <!-- 유효성 검사 실패 메시지 표시 -->
+            <small class="text-danger" th:if="${#fields.hasErrors('memberMobile')}" th:errors="*{memberMobile}"></small>                    
+            <!--// 회원 연락처(휴대폰) -->
+            
+            <!-- 회원  우편번호 -->	
+            <div id="zip_fld_pnl">	
+                <div class="fld_label">
+                    <label for="zip">우편번호</label>
+                </div>
+                <div class="fld_content">
+                    <input type="text" id="memberZip" name="memberZip" style="width:100px;" readonly />
+                    <!-- 주소 검색 -->
+                    <button type="button" id="address_search_btn" onclick="getPostcodeAddress()">주소 검색</button>
+                    <button type="button" id="address_delete_btn">주소 삭제</button>
+                </div>                    
+            </div>
+            <!-- 유효성 검사 실패 메시지 표시 -->
+            <small class="text-danger" th:if="${#fields.hasErrors('memberZip')}" th:errors="*{memberZip}"></small>
+            <!--// 회원 우편번호 -->
+                
+            <!-- 회원 기본 주소(도로명) -->	
+            <div id="road_address_fld_pnl">	
+                <div class="fld_label">
+                    <label for="roadAddress">도로명 주소</label>
+                </div>
+                <div class="fld_content">
+                    <input type="text" id="memberRoadAddress" name="memberRoadAddress" style="width:500px" readonly th:field="*{memberRoadAddress}" />
+                </div>
+            </div>
+            
+            <!-- 회원 기본 주소(지번) -->	
+            <div id="jibun_address_fld_pnl">	
+                <div class="fld_label">
+                    <label for="jibunAddress">지번 주소</label>
+                </div>    
+                <div class="fld_content">
+                    <input type="text" id="memberJibunAddress" name="memberJibunAddress" style="width:500px" readonly th:field="*{memberJibunAddress}" />
+                </div>
+            </div>
+            <!--// 회원 기본 주소 -->
+            
+            <!-- 회원 상세 주소 -->	
+            <div id="detail_address_fld_pnl">	
+                <div class="fld_label">
+                    <label for="detailAddress">상세주소</label>
+                </div>    
+                <div class="fld_content">
+                    <input type="text" id="memberDetailAddress" name="memberDetailAddress" style="width:400px" th:field="*{memberDetailAddress}" />
+                </div>
+            </div>
+            <!-- 유효성 검사 실패 메시지 표시 -->
+            <small class="text-danger" th:if="${#fields.hasErrors('memberDetailAddress')}" th:errors="*{memberDetailAddress}"></small>
+            <!--// 회원 상세주소 -->
+            
+            <!-- 회원  가입/취소 버튼 -->	
+            <div id="buttons_fld_pnl">	
+                <button id="submit_btn" type="submit">회원 가입</button>&nbsp;
+                <button id="reset_btn" type="button" th:onclick="history.back()">취소</button>
+            </div>
+            <!--// 회원 가입/취소 버튼 -->		
+    
+        </form>     
+    </div>
+    </div>
+	    <!--// 회원 가입 -->
+
+</body>
+</html>
